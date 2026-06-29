@@ -16,7 +16,10 @@
   ],
   "scripts": {
     "whimsy": "node bin/whimsy.mjs",
-    "test": "node --test"
+    "test": "node evals/test_grade.mjs && node evals/run.mjs",
+    "eval": "node evals/run.mjs",
+    "eval:test": "node evals/test_grade.mjs",
+    "eval:agentic": "node evals/run.mjs --agentic"
   },
   "engines": {
     "node": ">=18"

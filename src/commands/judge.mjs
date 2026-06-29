@@ -47,6 +47,8 @@ export default async function judge(ctx) {
     whimsyDir,
     config: ctx.config,
     auto,
+    // Range from the last reward's commit boundary (DESIGN §7.1); null → recent window.
+    sinceRef: economy.lastRewardRef(whimsyDir),
   });
 
   printProposal(ctx, proposal);

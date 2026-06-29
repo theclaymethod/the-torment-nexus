@@ -38,6 +38,8 @@ import { ledgerPath, ensureParent } from './paths.mjs';
  * @property {string|null} reason
  * @property {RewardSize|null} size Set for tier rewards, else null.
  * @property {string|null} session  Play session id for play/some decay entries.
+ * @property {string|null} [ref]    Git HEAD sha at the time (set on rewards; the
+ *                                  boundary judge ranges from). Absent on old entries.
  *
  * @typedef {object} Ledger
  * @property {number} version
@@ -128,6 +130,7 @@ function appendEntry(whimsyDir, ledger, fields) {
     reason: fields.reason ?? null,
     size: fields.size ?? null,
     session: fields.session ?? null,
+    ref: fields.ref ?? null,
   };
   ledger.entries.push(entry);
   ledger.balance = balanceAfter;
@@ -179,7 +182,7 @@ export function getBalance(whimsyDir) {
  * (`config.economy.reward_{small,good,great}`) or an explicit `amount` escape hatch
  * (DESIGN §7.2). `amount` takes precedence when both are given.
  * @param {string} whimsyDir
- * @param {{ size?: RewardSize, amount?: number, reason?: string,
+ * @param {{ size?: RewardSize, amount?: number, reason?: string, ref?: string|null,
  *           config: WhimsyConfig }} opts
  * @returns {{ delta: number, balance: number }}
  */
@@ -210,8 +213,26 @@ export function applyReward(whimsyDir, opts) {
     delta,
     reason: opts.reason ?? null,
     size,
+    ref: opts.ref ?? null,
   });
   return { delta: entry.delta, balance: entry.balanceAfter };
+}
+
+/**
+ * The git sha recorded by the most recent reward (the boundary `judge` ranges
+ * from), or `null` when no reward has stamped one yet (judge then falls back to a
+ * recent window). DESIGN §7.1.
+ * @param {string} whimsyDir
+ * @returns {string|null}
+ */
+export function lastRewardRef(whimsyDir) {
+  const ledger = readLedger(whimsyDir);
+  if (!ledger) return null;
+  for (let i = ledger.entries.length - 1; i >= 0; i--) {
+    const e = ledger.entries[i];
+    if (e.type === 'reward' && e.ref) return e.ref;
+  }
+  return null;
 }
 
 /**

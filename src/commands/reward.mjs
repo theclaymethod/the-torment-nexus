@@ -10,6 +10,7 @@
 
 import { resolveBase } from '../lib/paths.mjs';
 import * as economy from '../lib/economy.mjs';
+import { headSha } from '../lib/git.mjs';
 import { requireSoul, refreshSoulState } from '../lib/command.mjs';
 
 const SIZES = ['small', 'good', 'great'];
@@ -51,6 +52,8 @@ export default async function reward(ctx) {
     size: /** @type {'small'|'good'|'great'|undefined} */ (size),
     amount,
     reason,
+    // Stamp the commit boundary so the next `judge` reads the diff *since here*.
+    ref: headSha(ctx.cwd),
     config: ctx.config,
   });
 
