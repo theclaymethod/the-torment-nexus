@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# build output (none today — pure ESM — kept for future tsc/bundler)
+dist/
+build/
+
+# logs / os cruft
+*.log
+npm-debug.log*
+.DS_Store
+
+# editor
+.idea/
+.vscode/
+*.swp
+
+# local env
+.env
+.env.*
+
+# NOTE: this repo is the whimsy *tool*. A `.whimsy/` directory only appears in
+# projects that USE whimsy, and there it is intentionally COMMITTED (the soul's
+# memories and possessions are tracked). So `.whimsy/` is deliberately NOT ignored.

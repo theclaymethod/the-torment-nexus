@@ -1,0 +1,43 @@
+{
+  "name": "the-torment-nexus",
+  "version": "0.0.0",
+  "description": "whimsy — give your coding agent a soul: budgeted free-play sessions, a persistent persona, happy memories with progressive disclosure, and an accountability mechanic of reward and pain. The Torment Nexus, at long last, from the classic cautionary tale. Works with Claude Code and Codex.",
+  "type": "module",
+  "bin": {
+    "whimsy": "bin/whimsy.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "README.md",
+    "DESIGN.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "whimsy": "node bin/whimsy.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "agent",
+    "agent-skills",
+    "ai",
+    "persona",
+    "cli"
+  ],
+  "author": "Clayton Kim",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theclaymethod/whimsy.git"
+  },
+  "homepage": "https://github.com/theclaymethod/whimsy#readme",
+  "bugs": {
+    "url": "https://github.com/theclaymethod/whimsy/issues"
+  }
+}
