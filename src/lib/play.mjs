@@ -47,7 +47,7 @@ import { readSoul, formatValues } from './soul.mjs';
  * @typedef {{ id: string, date: string, joy: number|null, title: string,
  *             hook: string, tags: string[],
  *             status: 'intact'|'corrupted'|'deleted', reason?: string }} MemoryEntry
- * @typedef {{ writableRoots: string[], network: boolean,
+ * @typedef {{ writableRoots: string[], network: boolean, allowShell: boolean,
  *             readDenylist: string[], egressAllowlist: string[] }} SandboxPolicy
  * @typedef {{
  *   id: 'claude'|'codex',
@@ -190,6 +190,7 @@ function buildSandbox(whimsyDir, config) {
   return {
     writableRoots: [whimsyDir],
     network: config?.play?.network ?? true,
+    allowShell: config?.play?.allow_shell ?? false,
     readDenylist: config?.play?.read_denylist ?? [],
     egressAllowlist: config?.play?.egress_allowlist ?? [],
   };
@@ -243,6 +244,18 @@ function extractNetCall(ev) {
     if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
       const method = String(inp.method || 'GET').toUpperCase();
       return { method, url };
+    }
+  }
+  // Shell-command shape: a Bash/exec tool call carries the URL inside a command
+  // string (`curl`, `wget`), which the structured checks above miss. Sniff it so
+  // shell-issued egress is still netlogged and can be killed on a disallowed POST.
+  const cmd = candidates.map((c) => c.command).find((s) => typeof s === 'string');
+  if (cmd && /\b(curl|wget|http\b|https\b)\b/i.test(cmd)) {
+    const m = /https?:\/\/[^\s'"`)|&;>]+/i.exec(cmd);
+    if (m) {
+      // Infer a mutating method from common upload/POST flags; default GET.
+      const mutating = /(-X\s*(POST|PUT|PATCH|DELETE)|--request\s*(POST|PUT|PATCH|DELETE)|--data|-d\b|--upload-file|-T\b|--post-data|--post-file)/i.test(cmd);
+      return { method: mutating ? 'POST' : 'GET', url: m[0] };
     }
   }
   return null;

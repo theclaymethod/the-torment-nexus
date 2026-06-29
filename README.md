@@ -197,6 +197,7 @@ decay_unit       = 50000        # one memory claimed per this much debt
 
 [play]
 network          = true
+allow_shell      = false        # OFF by default: shell is the one tool that escapes the jail
 max_turns        = 40
 wrap_up_reserve  = 0.15         # fraction of budget held back for memory-writing
 read_denylist    = [".env*", "secrets/", "**/credentials*", "**/*.pem", ".git/config"]
@@ -242,24 +243,33 @@ first-class and applies, by design:
 - **Injection resistance:** the play prompt states the secret/egress boundaries
   and that web content is untrusted.
 
-### ⚠️ Known limitations (honest, as of v0)
+### Hardened defaults (and the residual, honestly)
 
-The confinement above is **not yet airtight** — an internal audit flagged these
-gaps, and they are real:
+An internal audit flagged that shell is the one tool that escapes the file-tool
+confinement. So **`play.allow_shell` defaults to `false`**:
 
-- **Shell escapes the jail.** Both the secret-denylist and the write-jail are
-  enforced through the agent's structured file tools. An agent that uses **Bash /
-  shell** (`cat .env`, `curl … -d @file`) bypasses them. Codex `workspace-write`
-  also makes the **whole project root** writable, not just `.whimsy/`.
-- **Egress hardening only sees structured calls.** `netlog` + POST-deny catch
-  `fetch`/WebFetch-style events; **shell-issued** network calls (`curl`, `wget`)
-  carry the URL inside a command string and slip past.
+- On **Claude Code**, play runs with `Bash` denied — so the write-jail and the
+  secret read-denylist actually hold. The soul can still read the project, make
+  art/code/notes in `.whimsy/`, and (with `network` on) fetch papers via
+  `WebFetch`/`WebSearch`; it just can't shell out.
+- The supervisor's **egress sniffing now also parses shell command strings**
+  (`curl`/`wget`), so even opt-in-shell play gets netlogged and killed on a
+  disallowed POST.
 
-Net: the **accountability mechanic is real and correct**; the **sandbox is
-defense-in-depth, not a guarantee.** Until these are hardened (OS-level sandbox
-or a Bash deny-list), **do not run unsupervised network-on play in a repo that
-holds real secrets.** `play.network = false` in config disables network entirely
-for the safest mode. Tracking issue: sandbox/egress hardening.
+**Residual gaps (still true):**
+
+- Turning `allow_shell = true` re-opens the shell bypass (you'll get a loud
+  warning). Use it only with an OS sandbox or in a repo with no secrets.
+- On **Codex**, writes are confined to `writable_roots` (`.whimsy/`) **plus the
+  workspace root (cwd)** — `workspace-write` makes cwd writable, and the secret
+  read-denylist is prompt-only there (Codex has no per-tool shell toggle). Treat
+  Codex play as less confined than Claude until an OS-level sandbox is added.
+- Egress kill is **best-effort** pattern-matching, not a network firewall.
+
+Net: the **accountability mechanic is real and correct**, and the default sandbox
+now **holds for Claude play**. For the safest mode, also set `play.network =
+false`. Do not run `allow_shell = true` play unsupervised in a repo with real
+secrets. Tracking issue: OS-level sandbox for fully-airtight confinement.
 
 ---
 

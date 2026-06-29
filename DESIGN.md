@@ -315,6 +315,7 @@ decay_unit        = 50000   # one memory claimed per this much debt
 
 [play]
 network           = true
+allow_shell       = false   # shell escapes the jail; off by default (opt in to enable Bash/exec)
 max_turns         = 40
 wrap_up_reserve   = 0.15    # fraction of budget held back for memory-writing
 read_denylist     = [".env*", "secrets/", "**/credentials*", "**/*.pem", ".git/config"]
@@ -404,12 +405,24 @@ are version-sensitive.
 Play simultaneously has project-read + network + write/execute in `.whimsy/` —
 the classic exfiltration triangle, running unsupervised. Mitigations:
 
-- **Secret-file read denylist on by default** (§5.2).
+- **Shell off by default (`play.allow_shell = false`).** Shell is the one tool
+  that escapes the file-tool confinement. With it off, Claude play denies `Bash`,
+  so the write-jail and secret read-denylist actually hold. Opt-in shell warns loudly.
+- **Secret-file read denylist on by default** (§5.2). Enforced via Claude `Read(...)`
+  deny-rules; prompt-only on Codex.
 - **Egress hardening:** log every network call; deny POST/PUT to non-allowlisted
-  hosts; supervisor kills on a disallowed-host POST.
-- **Sandbox confinement:** writes jailed to `.whimsy/`; never `danger-full-access`.
+  hosts; supervisor kills on a disallowed-host POST. Sniffing covers both
+  structured `fetch`/WebFetch events **and shell `curl`/`wget` command strings**.
+- **Sandbox confinement:** writes target `.whimsy/`; never `danger-full-access`.
+  Claude: confined by tool-permission rules (real once shell is off). Codex:
+  `workspace-write` confines writes to `writable_roots` + the workspace cwd.
 - **Injection resistance:** the play prompt states the secret/egress boundaries
   and that web content is untrusted.
+
+**Residual (honest):** with `allow_shell = true`, or on Codex (no per-tool shell
+toggle; cwd is writable), confinement is defense-in-depth, not airtight. The
+fully-airtight answer is an OS-level sandbox (macOS Seatbelt / Linux bubblewrap)
+wrapping the subprocess — tracked as the next hardening step.
 
 ---
 

@@ -156,14 +156,19 @@ export default async function handler(ctx) {
       `(${runtime.id}, up to ${maxTurns} turns).`,
   );
 
-  // Honest guardrail: the write-jail and secret denylist are best-effort and
-  // can be bypassed via the agent's shell. Warn before unsupervised network play.
-  if (config.play.network && !flags['no-warn']) {
-    log.warn(
-      'Network is ON and the sandbox is defense-in-depth, not airtight (shell can ' +
-        'escape the write-jail / read-denylist). Avoid unsupervised play in repos ' +
-        'with real secrets. Set play.network=false for the safest mode. (--no-warn to silence)',
-    );
+  // Honest guardrail. Shell is the one tool that escapes the write-jail + secret
+  // denylist; with it off (the default) the confinement holds for this runtime.
+  // Warn loudly only when shell is opted in alongside network — the real risk combo.
+  if (!flags['no-warn']) {
+    if (config.play.allow_shell && config.play.network) {
+      log.warn(
+        'Shell AND network are ON — the write-jail and secret read-denylist can be ' +
+          'bypassed via the agent shell (curl/cat). Avoid unsupervised play in repos with ' +
+          'real secrets; prefer an OS sandbox. (--no-warn to silence)',
+      );
+    } else if (config.play.allow_shell) {
+      log.warn('Shell is ON (network off): the agent can write outside the jail via shell. (--no-warn)');
+    }
   }
 
   // --- Run the session ----------------------------------------------------

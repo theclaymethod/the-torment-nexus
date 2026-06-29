@@ -66,9 +66,11 @@ export function buildSandboxRules(sandbox) {
     allow.push(`Write(${g})`, `Edit(${g})`);
   }
   if (sandbox.network) allow.push('WebFetch', 'WebSearch');
-  // Bash is a residual write/egress vector that CLI permission rules cannot fully
-  // confine; the play supervisor (play.mjs) + OS sandbox are the real boundary.
-  allow.push('Bash');
+  // Bash is the one tool that escapes these CLI permission rules — through it an
+  // agent can write outside the jail and read denylisted secrets. So it is OFF by
+  // default; only allow it when the user explicitly opts into shell play (and then
+  // the supervisor's egress sniffing + an OS sandbox are the remaining boundary).
+  if (sandbox.allowShell) allow.push('Bash');
   const deny = (sandbox.readDenylist || []).map((glob) => `Read(${glob})`);
   return { allow, deny };
 }

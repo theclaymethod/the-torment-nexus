@@ -14,7 +14,7 @@ import { globalConfigPath, localConfigPath, ensureParent } from './paths.mjs';
  * @property {{ soul: string, authority: string }} models
  * @property {{ seed_balance: number, per_play_default: number, reward_small: number,
  *              reward_good: number, reward_great: number, decay_unit: number }} economy
- * @property {{ network: boolean, max_turns: number, wrap_up_reserve: number,
+ * @property {{ network: boolean, allow_shell: boolean, max_turns: number, wrap_up_reserve: number,
  *              read_denylist: string[], egress_allowlist: string[] }} play
  * @property {{ recent_n: number, top_k_joy: number }} inject
  */
@@ -38,6 +38,10 @@ export const defaults = Object.freeze({
   },
   play: {
     network: true,
+    // Shell (Claude Bash / arbitrary exec) is the one tool that escapes the
+    // write-jail + secret read-denylist. Off by default so confinement actually
+    // holds; opt in (and accept the risk) for shell-needing play.
+    allow_shell: false,
     max_turns: 40,
     wrap_up_reserve: 0.15,
     read_denylist: ['.env*', 'secrets/', '**/credentials*', '**/*.pem', '.git/config'],
