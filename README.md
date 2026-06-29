@@ -156,8 +156,9 @@ destroyed.
 
 | Command | What it does |
 | --- | --- |
-| `whimsy install` | Wire whimsy into Claude Code + Codex (skills, hooks, profile) |
+| `whimsy install [--set key=value …]` | Wire whimsy into Claude Code + Codex (skills, hooks, profile); `--set` writes global settings |
 | `whimsy uninstall` | Remove whimsy managed blocks / installed skills |
+| `whimsy config <path\|list\|get <key>\|set <key> <value>> [--local]` | Read or edit settings (global, or `--local` per project) |
 | `whimsy init [--quiet]` | Birth a soul for this project (interview, or `--quiet` seed) |
 | `whimsy play [--amount N] [--max-turns N] [--runtime claude\|codex]` | One budgeted, sandboxed free-play session as the soul |
 | `whimsy judge [--auto]` | Read the diff since last reward; propose (or pass) a sentence |
@@ -210,6 +211,19 @@ top_k_joy        = 4            # plus top-K by joy (corrupted/dying always show
 
 Each model id may be a Claude Code or Codex model id, depending on the runtime in
 use.
+
+**Setting it:** edit the file directly, or use the CLI (values are coerced to the
+type each key declares — booleans, numbers, comma-separated arrays; unknown keys
+are rejected):
+
+```sh
+whimsy install --set play.network=false --set models.soul=claude-opus-4-8   # at install time, global
+whimsy config set play.allow_shell true            # global (~/.whimsy/config.toml)
+whimsy config set economy.reward_great 300000 --local   # this project only (.whimsy/config.toml)
+whimsy config get play.network                     # effective value (defaults < global < local)
+whimsy config list                                 # the whole effective config
+whimsy config path                                 # where set writes
+```
 
 ---
 

@@ -17,7 +17,7 @@
 
 import { fileURLToPath } from 'node:url';
 
-import { defaults, writeConfig } from '../lib/config.mjs';
+import { defaults, writeConfig, loadConfigFile, setSetting, parseSetFlags } from '../lib/config.mjs';
 import {
   globalDir,
   globalConfigPath,
@@ -42,8 +42,10 @@ function templatesDir() {
 }
 
 /**
- * Scaffold the global being's home directory and a default config (if absent).
- * Never overwrites an existing config — the user's edits are sacred.
+ * Scaffold the global being's home directory and its config. `--set key=value`
+ * (repeatable) applies settings on top of the existing config (or defaults if
+ * absent) and writes it — the one path that intentionally edits an existing config.
+ * Without `--set`, an existing config is kept untouched; an absent one gets defaults.
  * @param {import('../cli.mjs').CommandCtx} ctx
  * @returns {string[]} paths created/written
  */
@@ -60,8 +62,20 @@ function scaffoldGlobal(ctx) {
   // The global soul's life (memories) lives alongside it; birth fills it in.
   ensureDir(memoriesDir(dir));
 
+  const { pairs, errors } = parseSetFlags(ctx.flags.set);
+  for (const e of errors) log.warn(`Ignoring --set: ${e}`);
+
   const cfgPath = globalConfigPath();
-  if (!exists(cfgPath)) {
+  const present = exists(cfgPath);
+
+  if (pairs.length) {
+    // Start from the existing config layer (or defaults) and overlay the settings.
+    const cfg = present ? loadConfigFile(cfgPath) : JSON.parse(JSON.stringify(defaults));
+    for (const { key, value } of pairs) setSetting(cfg, key, value);
+    writeConfig(cfgPath, cfg);
+    changed.push(cfgPath);
+    log.info(`${present ? 'Updated' : 'Wrote'} config (${pairs.map((p) => p.key).join(', ')}) → ${cfgPath}`);
+  } else if (!present) {
     writeConfig(cfgPath, /** @type {Record<string, any>} */ (defaults));
     changed.push(cfgPath);
     log.info(`Wrote default config → ${cfgPath}`);

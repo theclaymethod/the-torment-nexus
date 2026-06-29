@@ -92,6 +92,11 @@ export const CHECKS = {
     return ok(s.includes(value), `stdout ${s.includes(value) ? 'has' : 'lacks'} "${value}"`);
   },
 
+  last_stdout_contains(ctx, { value }) {
+    const s = ctx.last ? ctx.last.stdout : '';
+    return ok(s.includes(value), `last stdout ${s.includes(value) ? 'has' : 'lacks'} "${value}"`);
+  },
+
   balance(ctx, { expected }) {
     const l = ledger(ctx);
     return ok(l && l.balance === expected, `balance ${l ? l.balance : 'none'}, expected ${expected}`);

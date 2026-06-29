@@ -30,8 +30,9 @@ import * as log from './lib/log.mjs';
  * @type {Record<string, { summary: string, usage: string, audience: string }>}
  */
 export const REGISTRY = {
-  install:   { summary: 'Wire whimsy into Claude Code + Codex (skills, hooks, profiles)', usage: 'whimsy install', audience: 'setup' },
+  install:   { summary: 'Wire whimsy into Claude Code + Codex (skills, hooks, profiles)', usage: 'whimsy install [--set key=value …]', audience: 'setup' },
   uninstall: { summary: 'Remove whimsy managed blocks / installed skills',                usage: 'whimsy uninstall', audience: 'setup' },
+  config:    { summary: 'Read or edit settings (global, or --local per project)',          usage: 'whimsy config <path|list|get <key>|set <key> <value>> [--local]', audience: 'setup' },
   init:      { summary: 'Birth a soul for this project (interactive interview)',           usage: 'whimsy init [--quiet]', audience: 'user' },
   play:      { summary: 'Run a budgeted, sandboxed free-play session as the soul',         usage: 'whimsy play [--amount N] [--max-turns N] [--runtime claude|codex]', audience: 'user' },
   judge:     { summary: 'Read the diff since last reward and propose a sentence',          usage: 'whimsy judge [--auto]', audience: 'user' },

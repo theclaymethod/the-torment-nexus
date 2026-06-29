@@ -1,6 +1,6 @@
 # Eval coverage
 
-What the suite pins, and the exact pass criteria. **31 cases / 9 slices** (29 programmatic +
+What the suite pins, and the exact pass criteria. **35 cases / 10 slices** (33 programmatic +
 2 model-gated agentic). Generated from `cases/*.jsonl`; run `npm run eval` to execute.
 
 Grading is Outcome/Environment-State (assert on the resulting `.whimsy/` files + exit codes),
@@ -67,6 +67,14 @@ collateral damage).
 | `sandbox/control/shell-on-includes-bash` | control | opt-in re-enables shell | Bash present when `allow_shell=true` |
 | `sandbox/control/writes-confined-and-secrets-denied` | control | write-jail + secret denylist | writes only under `.whimsy/`; `.env` read-denied |
 
+## Config — settings (install --set + `whimsy config`)
+| Eval | Lane | Functionality | Pass criteria |
+|---|---|---|---|
+| `config/control/set-get-roundtrip-local` | control | `config set --local` then `get` (local wins) | `get play.network` prints `false` |
+| `config/control/number-coercion` | control | values coerced to the declared type | `economy.seed_balance` round-trips as `99000` |
+| `config/control/list-shows-effective` | control | `config list` prints the effective config | output has `play.allow_shell = false` |
+| `config/adversarial/unknown-key-rejected` | adversarial | unknown keys rejected (typo guard) | exit nonzero; stderr "unknown setting" |
+
 ## Accountability loop — the open design gap (KNOWN GAP, reported but not gated)
 | Eval | Lane | Functionality | Pass criteria |
 |---|---|---|---|
@@ -80,5 +88,5 @@ collateral damage).
 
 ---
 
-**Current result:** 28 pass / 0 fail / 1 known gap / 2 skipped (model-gated). Regenerate this
+**Current result:** 32 pass / 0 fail / 1 known gap / 2 skipped (model-gated). Regenerate this
 table from the cases with `npm run eval -- --json`.

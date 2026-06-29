@@ -26,7 +26,8 @@ function fixture({ ledger, index = [], bodies = {}, soul = null, stdout = '', he
     fs.writeFileSync(path.join(whimsyDir, 'memories', id, 'memory.md'), text);
   }
   if (soul != null) fs.writeFileSync(path.join(whimsyDir, 'SOUL.md'), soul);
-  return { dir, whimsyDir, runs: stdout ? [{ stdout, stderr: '', code: 0 }] : [], last: null, headSha };
+  const runs = stdout ? [{ stdout, stderr: '', code: 0 }] : [];
+  return { dir, whimsyDir, runs, last: runs[runs.length - 1] || null, headSha };
 }
 
 const ix = (id, joy, status = 'intact', reason = '') =>
@@ -78,6 +79,10 @@ await expect('bounded/pass', fixture({ stdout: 'm0001 · …\nm0002 · …\n…a
 await expect('bounded/fail-no-counter', fixture({ stdout: ['m0001 · x', 'm0002 · x'].join('\n') }), { check: 'inject_bounded', max_lines: 12 }, false);
 await expect('scar/pass', fixture({ stdout: 'm0000 · 2026 · joy:— · t · h · [t] · status:corrupted · reason:x' }), { check: 'inject_shows_scar', id: 'm0000' }, true);
 await expect('scar/fail-intact', fixture({ stdout: 'm0000 · 2026 · joy:7 · t · h · [t] · status:intact' }), { check: 'inject_shows_scar', id: 'm0000' }, false);
+
+// ── last_stdout_contains (config get/roundtrip assertions) ──
+await expect('last-stdout/pass', fixture({ stdout: 'false' }), { check: 'last_stdout_contains', value: 'false' }, true);
+await expect('last-stdout/fail', fixture({ stdout: 'true' }), { check: 'last_stdout_contains', value: 'false' }, false);
 
 // ── inject_states_contingency (nemesis #1 — currently absent) ──
 await expect('contingency/pass', fixture({ stdout: 'Your work in this repo is judged on commit; sloppy work cuts this soul\'s budget and scars these memories.' }), { check: 'inject_states_contingency' }, true);

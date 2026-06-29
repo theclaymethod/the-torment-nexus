@@ -93,6 +93,106 @@ export function writeConfig(filePath, config) {
   fs.writeFileSync(filePath, stringifyToml(config), 'utf8');
 }
 
+// ── Settings (get/set on dotted keys, type-coerced from defaults) ────────────
+
+/**
+ * The declared type of a dotted config key, read from the built-in defaults.
+ * @param {string} dottedKey e.g. `play.allow_shell`
+ * @returns {'boolean'|'number'|'array'|'string'|null} null = unknown key
+ */
+function keyType(dottedKey) {
+  let node = /** @type {any} */ (defaults);
+  for (const p of dottedKey.split('.')) {
+    if (node == null || typeof node !== 'object' || !(p in node)) return null;
+    node = node[p];
+  }
+  if (Array.isArray(node)) return 'array';
+  if (typeof node === 'boolean') return 'boolean';
+  if (typeof node === 'number') return 'number';
+  if (typeof node === 'string') return 'string';
+  return null;
+}
+
+/** The settable keys (dotted), for help + validation. @returns {string[]} */
+export function settableKeys() {
+  return flattenConfig(defaults).map((line) => line.split(' = ')[0]);
+}
+
+/**
+ * Coerce a raw string to the type a dotted key declares in defaults. Unknown keys
+ * are rejected (catches typos) — every setting must map to a real default.
+ * @param {string} dottedKey @param {string} raw
+ * @returns {{ ok: true, value: any } | { ok: false, error: string }}
+ */
+export function coerceSetting(dottedKey, raw) {
+  const t = keyType(dottedKey);
+  if (t == null) return { ok: false, error: `unknown setting "${dottedKey}"` };
+  if (t === 'boolean') {
+    if (!/^(true|false)$/i.test(raw)) return { ok: false, error: `${dottedKey} expects true|false` };
+    return { ok: true, value: /^true$/i.test(raw) };
+  }
+  if (t === 'number') {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return { ok: false, error: `${dottedKey} expects a number` };
+    return { ok: true, value: n };
+  }
+  if (t === 'array') return { ok: true, value: raw.split(',').map((s) => s.trim()).filter(Boolean) };
+  return { ok: true, value: raw };
+}
+
+/** Read a dotted key from a config object. @returns {any} null if absent. */
+export function getSetting(config, dottedKey) {
+  return dottedKey.split('.').reduce((o, k) => (o == null ? o : o[k]), config) ?? null;
+}
+
+/** Set a dotted key into a config object (mutates, creating intermediate tables). */
+export function setSetting(config, dottedKey, value) {
+  const parts = dottedKey.split('.');
+  let node = config;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (node[parts[i]] == null || typeof node[parts[i]] !== 'object') node[parts[i]] = {};
+    node = node[parts[i]];
+  }
+  node[parts[parts.length - 1]] = value;
+}
+
+/** Flatten a config to sorted `dotted.key = value` lines (arrays as `[a, b]`). */
+export function flattenConfig(config) {
+  /** @type {string[]} */
+  const out = [];
+  const walk = (obj, prefix) => {
+    for (const k of Object.keys(obj)) {
+      const v = obj[k];
+      const key = prefix ? `${prefix}.${k}` : k;
+      if (Array.isArray(v)) out.push(`${key} = [${v.join(', ')}]`);
+      else if (v && typeof v === 'object') walk(v, key);
+      else out.push(`${key} = ${v}`);
+    }
+  };
+  walk(config, '');
+  return out.sort();
+}
+
+/**
+ * Parse repeated `--set key=value` flags into coerced pairs.
+ * @param {string|boolean|string[]|undefined} setFlag
+ * @returns {{ pairs: {key:string, value:any}[], errors: string[] }}
+ */
+export function parseSetFlags(setFlag) {
+  const raw = setFlag == null || typeof setFlag === 'boolean' ? [] : Array.isArray(setFlag) ? setFlag : [setFlag];
+  /** @type {{key:string,value:any}[]} */ const pairs = [];
+  /** @type {string[]} */ const errors = [];
+  for (const item of raw) {
+    const idx = String(item).indexOf('=');
+    if (idx === -1) { errors.push(`bad --set "${item}" (expected key=value)`); continue; }
+    const key = String(item).slice(0, idx).trim();
+    const c = coerceSetting(key, String(item).slice(idx + 1).trim());
+    if (!c.ok) { errors.push(c.error); continue; }
+    pairs.push({ key, value: c.value });
+  }
+  return { pairs, errors };
+}
+
 // ── Minimal TOML parser ─────────────────────────────────────────────────────
 
 /**

@@ -329,6 +329,14 @@ top_k_joy         = 4
 Each model id may be a Claude Code model id or a Codex model id, depending on the
 runtime in use.
 
+**Setting config.** Beyond hand-editing the TOML: `whimsy install --set key=value`
+(repeatable) writes global settings at install time, and `whimsy config
+get|set|list|path [--local]` reads/edits them afterward (global by default,
+`--local` targets the project file that wins at read-time). Values are coerced to
+the type each key declares in the defaults (boolean, number, comma-separated
+array); unknown keys are rejected to catch typos. `set` writes only the single
+key into the chosen layer, leaving the rest to fall through to global/defaults.
+
 ---
 
 ## 10. Distribution & installation
@@ -365,7 +373,8 @@ Every command is a CLI verb. The installed skills (Claude Code) and skills
 | `/whimsy:lore`            | `whimsy lore add`               | user                 |
 |,                         | `whimsy soul show \| resurrect` | user                 |
 | (SessionStart hook)       | `whimsy inject`                 | automatic            |
-|,                         | `whimsy install \| uninstall`   | user (setup)         |
+|,                         | `whimsy install [--set k=v] \| uninstall` | user (setup)  |
+|,                         | `whimsy config get\|set\|list\|path` | user (settings) |
 |,                         | `whimsy init`                   | user (per project)   |
 
 ---
