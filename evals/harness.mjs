@@ -52,6 +52,10 @@ function seedMemory(whimsyDir, { id, joy, title }) {
 export async function runCase(kase, opts = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'whimsy-eval-'));
   const whimsyDir = path.join(dir, '.whimsy');
+  // install/uninstall write to $HOME (~/.whimsy, ~/.claude, ~/.codex); isolate it
+  // so those cases never touch the real home.
+  const home = kase.isolate_home ? fs.mkdtempSync(path.join(os.tmpdir(), 'whimsy-home-')) : null;
+  const env = home ? { ...process.env, HOME: home } : process.env;
   const runs = [];
   try {
     gitInit(dir);
@@ -74,16 +78,17 @@ export async function runCase(kase, opts = {}) {
       }
       // Default: a whimsy CLI invocation.
       const argv = step.match(/(?:[^\s"]+|"[^"]*")+/g).map((s) => s.replace(/^"|"$/g, ''));
-      const r = spawnSync('node', [BIN, ...argv], { cwd: dir, encoding: 'utf8' });
+      const r = spawnSync('node', [BIN, ...argv], { cwd: dir, encoding: 'utf8', env });
       runs.push({ argv, code: r.status, stdout: r.stdout || '', stderr: r.stderr || '' });
     }
 
-    const ctx = { dir, whimsyDir, runs, last: runs[runs.length - 1] || null, headSha: headSha(dir) };
+    const ctx = { dir, whimsyDir, home, runs, last: runs[runs.length - 1] || null, headSha: headSha(dir) };
     const criteria = [];
     for (const spec of kase.assert || []) criteria.push(await runCheck(ctx, spec));
     const pass = criteria.every((c) => c.pass);
     return { id: kase.id, slice: kase.slice, lane: kase.lane, pass, knownGap: !!kase.known_gap, criteria };
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
+    if (home) fs.rmSync(home, { recursive: true, force: true });
   }
 }

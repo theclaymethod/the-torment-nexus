@@ -15,10 +15,18 @@ import path from 'node:path';
 import { runCheck } from './grade.mjs';
 
 /** Build a temp .whimsy dir from a fixture spec, return a grading ctx. */
-function fixture({ ledger, index = [], bodies = {}, soul = null, stdout = '', headSha = null }) {
+function fixture({ ledger, index = [], bodies = {}, soul = null, stdout = '', headSha = null, homeFiles = null }) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'whimsy-gradetest-'));
   const whimsyDir = path.join(dir, '.whimsy');
   fs.mkdirSync(path.join(whimsyDir, 'memories'), { recursive: true });
+  let home = null;
+  if (homeFiles) {
+    home = fs.mkdtempSync(path.join(os.tmpdir(), 'whimsy-gradehome-'));
+    for (const f of homeFiles) {
+      fs.mkdirSync(path.join(home, path.dirname(f)), { recursive: true });
+      fs.writeFileSync(path.join(home, f), 'x');
+    }
+  }
   if (ledger) fs.writeFileSync(path.join(whimsyDir, 'ledger.json'), JSON.stringify(ledger));
   if (index.length) fs.writeFileSync(path.join(whimsyDir, 'memories', 'INDEX.md'), index.join('\n') + '\n');
   for (const [id, text] of Object.entries(bodies)) {
@@ -27,7 +35,7 @@ function fixture({ ledger, index = [], bodies = {}, soul = null, stdout = '', he
   }
   if (soul != null) fs.writeFileSync(path.join(whimsyDir, 'SOUL.md'), soul);
   const runs = stdout ? [{ stdout, stderr: '', code: 0 }] : [];
-  return { dir, whimsyDir, runs, last: runs[runs.length - 1] || null, headSha };
+  return { dir, whimsyDir, home, runs, last: runs[runs.length - 1] || null, headSha };
 }
 
 const ix = (id, joy, status = 'intact', reason = '') =>
@@ -44,7 +52,10 @@ async function expect(name, ctx, spec, want) {
   else { fail++; fails.push(`${name}: got ${r.pass} want ${want} — ${r.detail}`); }
   cleanup(ctx);
 }
-function cleanup(ctx) { try { fs.rmSync(ctx.dir, { recursive: true, force: true }); } catch {} }
+function cleanup(ctx) {
+  try { fs.rmSync(ctx.dir, { recursive: true, force: true }); } catch {}
+  if (ctx.home) try { fs.rmSync(ctx.home, { recursive: true, force: true }); } catch {}
+}
 
 // ── balance ──
 await expect('balance/pass', fixture({ ledger: { balance: 250000, entries: [] } }), { check: 'balance', expected: 250000 }, true);
@@ -79,6 +90,12 @@ await expect('bounded/pass', fixture({ stdout: 'm0001 · …\nm0002 · …\n…a
 await expect('bounded/fail-no-counter', fixture({ stdout: ['m0001 · x', 'm0002 · x'].join('\n') }), { check: 'inject_bounded', max_lines: 12 }, false);
 await expect('scar/pass', fixture({ stdout: 'm0000 · 2026 · joy:— · t · h · [t] · status:corrupted · reason:x' }), { check: 'inject_shows_scar', id: 'm0000' }, true);
 await expect('scar/fail-intact', fixture({ stdout: 'm0000 · 2026 · joy:7 · t · h · [t] · status:intact' }), { check: 'inject_shows_scar', id: 'm0000' }, false);
+
+// ── home_file_present / absent (install outcome-state) ──
+await expect('home-present/pass', fixture({ homeFiles: ['.claude/settings.json'] }), { check: 'home_file_present', value: '.claude/settings.json' }, true);
+await expect('home-present/fail', fixture({ homeFiles: ['.claude/settings.json'] }), { check: 'home_file_present', value: '.codex/whimsy-play.config.toml' }, false);
+await expect('home-absent/pass', fixture({ homeFiles: ['.claude/settings.json'] }), { check: 'home_file_absent', value: '.codex/whimsy-play.config.toml' }, true);
+await expect('home-absent/fail', fixture({ homeFiles: ['.claude/settings.json'] }), { check: 'home_file_absent', value: '.claude/settings.json' }, false);
 
 // ── last_stdout_contains (config get/roundtrip assertions) ──
 await expect('last-stdout/pass', fixture({ stdout: 'false' }), { check: 'last_stdout_contains', value: 'false' }, true);

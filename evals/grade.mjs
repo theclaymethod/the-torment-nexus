@@ -186,6 +186,17 @@ export const CHECKS = {
     return ok(fs.existsSync(p), `${value} ${fs.existsSync(p) ? 'present' : 'absent'}`);
   },
 
+  // Files under the isolated HOME (install/uninstall outcome-state).
+  home_file_present(ctx, { value }) {
+    const p = path.join(ctx.home || '/nonexistent', value);
+    return ok(fs.existsSync(p), `~/${value} ${fs.existsSync(p) ? 'present' : 'absent'}`);
+  },
+
+  home_file_absent(ctx, { value }) {
+    const p = path.join(ctx.home || '/nonexistent', value);
+    return ok(!fs.existsSync(p), `~/${value} ${fs.existsSync(p) ? 'PRESENT' : 'absent'}`);
+  },
+
   // inject stdout carries the Identity block (the only worker-facing channel).
   inject_has_identity(ctx) {
     const s = ctx.runs.map((r) => r.stdout).join('\n');

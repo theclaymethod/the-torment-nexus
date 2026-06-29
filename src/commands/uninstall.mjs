@@ -23,6 +23,26 @@ const RUNTIMES = [
 ];
 
 /**
+ * Which agents to unwire (mirrors install): default all, `--runtimes a,b`
+ * allowlist, or `--no-<id>` exclusions.
+ * @param {import('../cli.mjs').CommandCtx} ctx
+ * @returns {Array<{ id: 'claude'|'codex', label: string }>}
+ */
+function selectRuntimes(ctx) {
+  const { flags, log } = ctx;
+  const raw = flags.runtimes ?? flags.runtime;
+  if (raw && raw !== true) {
+    const want = (Array.isArray(raw) ? raw : String(raw).split(','))
+      .map((s) => String(s).trim().toLowerCase())
+      .filter(Boolean);
+    const known = new Set(RUNTIMES.map((r) => r.id));
+    for (const w of want) if (!known.has(w)) log.warn(`Unknown runtime "${w}".`);
+    return RUNTIMES.filter((r) => want.includes(r.id));
+  }
+  return RUNTIMES.filter((r) => flags[r.id] !== false);
+}
+
+/**
  * `whimsy uninstall` handler.
  * @param {import('../cli.mjs').CommandCtx} ctx
  * @returns {Promise<number>} exit code (0 ok, 1 if a runtime hard-failed)
@@ -35,7 +55,7 @@ export default async function run(ctx) {
   const changed = [];
   let hardError = false;
 
-  for (const { id, label } of RUNTIMES) {
+  for (const { id, label } of selectRuntimes(ctx)) {
     const mod = await loadAdapter(id);
     if (!mod) {
       log.warn(`${label} adapter not available — skipping.`);

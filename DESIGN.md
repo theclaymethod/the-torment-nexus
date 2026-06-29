@@ -341,10 +341,18 @@ key into the chosen layer, leaving the rest to fall through to global/defaults.
 
 ## 10. Distribution & installation
 
-- **Package:** npm, Node-compatible ESM so `npx whimsy` works with **no build step**.
-  Published name `@theclaymethod/whimsy`; the bin is `whimsy`.
-- **`whimsy install`**: system-level wiring, idempotent, using delimited managed
-  blocks so `uninstall` reverses cleanly:
+- **Package:** npm, Node-compatible ESM, **no build step**. Published name
+  `the-torment-nexus`; the bin is `whimsy`.
+- **Global install is required.** The skills and SessionStart hooks all shell out
+  to a bare `whimsy …`, so the command must resolve on PATH (`npm i -g
+  the-torment-nexus`, or `npm i -g .` from a clone). **`npx … install` is
+  unsupported** — npx never puts `whimsy` on PATH, so the hooks/skills it writes
+  would fail "command not found". `install` ends with a PATH self-check that warns
+  when `whimsy` isn't resolvable (and detects the npx case).
+- **`whimsy install [--runtimes claude,codex | --no-codex] [--set key=value …]`**:
+  system-level wiring, idempotent, using delimited managed blocks so `uninstall`
+  (same selection flags) reverses cleanly. `--runtimes` picks which agents to wire
+  (default both); `--set` writes global settings at the same time (§9):
   - Claude Code: skills into `~/.claude/skills/whimsy-*/`, SessionStart hook.
   - Codex: skills into `~/.codex/skills/whimsy-*/`, `[[hooks.SessionStart]]`, and
     the `~/.codex/whimsy-play.config.toml` play profile (pinned model +

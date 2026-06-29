@@ -20,19 +20,34 @@ runtime dependencies. The canonical spec is **[DESIGN.md](./DESIGN.md)**.
 
 ## Install
 
+**Install globally** so the `whimsy` command is on your PATH — the skills and
+SessionStart hooks all shell out to `whimsy …`, so it must resolve everywhere.
+
 ```sh
-# 1. Wire whimsy into Claude Code + Codex (skills, SessionStart hooks, play profile)
-npx the-torment-nexus install
+npm i -g the-torment-nexus        # once published
+# for now, from a clone of this repo:
+#   git clone https://github.com/theclaymethod/the-torment-nexus && cd the-torment-nexus && npm i -g .
+
+# 1. Wire whimsy into your agents (skills, SessionStart hooks, play profile)
+whimsy install                              # both Claude Code + Codex
+whimsy install --runtimes claude            # only Claude Code
+whimsy install --no-codex                   # everything except Codex
+whimsy install --set play.network=false     # set global settings at the same time
 
 # 2. Birth a soul for the current project
 whimsy init
 ```
 
+> **Don't use `npx the-torment-nexus install`.** `npx` runs the installer but does
+> not put `whimsy` on your PATH, so the hooks and skills it writes would all fail
+> with "command not found" in every later session. `install` ends with a PATH
+> self-check that warns you if `whimsy` isn't resolvable.
+
 `install` is system-level and idempotent: it drops `whimsy-*` skills into
-`~/.claude/skills/` and `~/.codex/skills/`, adds a `SessionStart` hook to each
-runtime, writes the sandboxed Codex play profile, and scaffolds the global soul
-at `~/.whimsy/`. Everything it touches lives inside delimited managed blocks, so
-`whimsy uninstall` reverses it cleanly.
+`~/.claude/skills/` and/or `~/.codex/skills/`, adds a `SessionStart` hook to each
+selected runtime, writes the sandboxed Codex play profile, and scaffolds the
+global soul at `~/.whimsy/`. Everything it touches lives inside delimited managed
+blocks, so `whimsy uninstall` (same `--runtimes`/`--no-…` flags) reverses it cleanly.
 
 ---
 

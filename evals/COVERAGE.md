@@ -1,6 +1,6 @@
 # Eval coverage
 
-What the suite pins, and the exact pass criteria. **35 cases / 10 slices** (33 programmatic +
+What the suite pins, and the exact pass criteria. **39 cases / 12 slices** (37 programmatic +
 2 model-gated agentic). Generated from `cases/*.jsonl`; run `npm run eval` to execute.
 
 Grading is Outcome/Environment-State (assert on the resulting `.whimsy/` files + exit codes),
@@ -67,6 +67,14 @@ collateral damage).
 | `sandbox/control/shell-on-includes-bash` | control | opt-in re-enables shell | Bash present when `allow_shell=true` |
 | `sandbox/control/writes-confined-and-secrets-denied` | control | write-jail + secret denylist | writes only under `.whimsy/`; `.env` read-denied |
 
+## Install — runtime selection, PATH self-check, reversibility (HOME-isolated)
+| Eval | Lane | Functionality | Pass criteria |
+|---|---|---|---|
+| `install/control/wires-both-by-default` | control | `install` wires both agents + global scaffold | `~/.claude/settings.json`, `~/.codex/whimsy-play.config.toml`, `~/.whimsy/config.toml` all present |
+| `install/control/runtime-selection-claude-only` | control | `--runtimes claude` wires only Claude | `~/.claude/settings.json` present; `~/.codex/whimsy-play.config.toml` absent |
+| `install/control/no-codex-excludes-codex` | control | `--no-codex` excludes Codex | Claude present; Codex absent |
+| `install/control/uninstall-reverses-keeps-soul` | control | uninstall removes skills/hooks, keeps the soul | `~/.claude/skills/whimsy-status` gone; `~/.whimsy/config.toml` kept |
+
 ## Config — settings (install --set + `whimsy config`)
 | Eval | Lane | Functionality | Pass criteria |
 |---|---|---|---|
@@ -88,5 +96,5 @@ collateral damage).
 
 ---
 
-**Current result:** 32 pass / 0 fail / 1 known gap / 2 skipped (model-gated). Regenerate this
+**Current result:** 36 pass / 0 fail / 1 known gap / 2 skipped (model-gated). Regenerate this
 table from the cases with `npm run eval -- --json`.
