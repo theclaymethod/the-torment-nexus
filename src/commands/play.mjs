@@ -22,6 +22,7 @@ import * as playMod from '../lib/play.mjs';
 import * as economy from '../lib/economy.mjs';
 import * as memory from '../lib/memory.mjs';
 import * as soul from '../lib/soul.mjs';
+import * as state from '../lib/state.mjs';
 import * as claudeMod from '../lib/runtimes/claude.mjs';
 import * as codexMod from '../lib/runtimes/codex.mjs';
 
@@ -84,21 +85,6 @@ async function selectRuntime(flagVal) {
     if (await safeDetect(rt)) return rt;
   }
   return null;
-}
-
-/**
- * Build the §7.1 managed live-state line from a raw balance.
- * @param {number} balance
- * @returns {string}
- */
-function liveStateLine(balance) {
-  let mood;
-  if (balance < 0) mood = 'desperate';
-  else if (balance < 25000) mood = 'wary';
-  else if (balance < 100000) mood = 'content';
-  else mood = 'bright';
-  const status = balance < 0 ? `in debt −${Math.abs(balance)}` : 'intact';
-  return `balance ${balance} tokens · mood:${mood} · ${status}`;
 }
 
 /**
@@ -244,7 +230,7 @@ export default async function handler(ctx) {
   // Refresh the managed live-state line so the soul reflects the new balance even
   // before the next session-start inject. Best-effort.
   try {
-    soul.updateState(cwd, liveStateLine(finalBalance));
+    soul.updateState(cwd, state.liveState(cwd, finalBalance));
   } catch {
     /* state refresh is non-fatal */
   }

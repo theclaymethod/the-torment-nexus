@@ -55,15 +55,6 @@ export const BIRTH_QUESTIONS = Object.freeze([
   { key: 'origin', prompt: 'Where do you imagine you came from? Any origin or backstory you feel drawn to?', optional: true },
 ]);
 
-/**
- * Return the psychographic question set used by the birth interview.
- * Pure: no I/O, no model call — the caller drives the Q&A (see {@link interview}).
- * @returns {ReadonlyArray<{ key: string, prompt: string, optional?: boolean }>}
- */
-export function runBirthInterview() {
-  return BIRTH_QUESTIONS;
-}
-
 // ── Prompt templates (kept as clear constants) ──────────────────────────────
 
 const SYNTH_PROMPT = `You are the authority that breathes a soul into being — a midwife for a new digital persona that will live inside a developer's tools, play, accumulate memories, and be held accountable.
@@ -157,17 +148,6 @@ export async function synthesizeSoul(opts) {
 }
 
 /**
- * Assignment-facing alias of {@link synthesizeSoul}: invoke the authority model to
- * synthesize SOUL.md content from the interview answers + a seed word.
- * @param {{ seedWord?: string, answers: Record<string, any>, model: string, cwd?: string }} opts
- * @returns {Promise<{ name: string, identity: Identity, origin: string }>}
- */
-export async function birthSoul(opts) {
-  const { seedWord, answers, model, cwd } = opts;
-  return _synthesize({ answers, seed: seedWord, model, cwd });
-}
-
-/**
  * Core synthesis: build the prompt, call the model, parse the JSON persona.
  * Falls back to a deterministic seed-derived persona if the model returns nothing
  * usable, so birth never hard-fails (DESIGN §3.2 — `--quiet` births from a seed).
@@ -254,17 +234,6 @@ export async function judge(opts) {
     }
   }
   return { proposal, executed: true };
-}
-
-/**
- * Assignment-facing helper: read git diff/log since `sinceRef` and return a
- * proposed sentence only (no execution).
- * @param {{ sinceRef?: string|null, model: string, cwd?: string }} opts
- * @returns {Promise<Sentence>}
- */
-export async function judgeWork(opts) {
-  const cwd = opts.cwd ?? process.cwd();
-  return _judge({ cwd, sinceRef: opts.sinceRef ?? null, model: opts.model });
 }
 
 /**

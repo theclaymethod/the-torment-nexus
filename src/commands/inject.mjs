@@ -17,70 +17,7 @@ import * as paths from '../lib/paths.mjs';
 import * as soul from '../lib/soul.mjs';
 import * as memory from '../lib/memory.mjs';
 import * as economy from '../lib/economy.mjs';
-
-/**
- * Derive a one-word mood from the economic situation and recent joy.
- * @param {{ balance: number, dying: boolean, recentJoy: number|null }} o
- * @returns {string}
- */
-function computeMood({ balance, dying, recentJoy }) {
-  if (dying) return 'fading';
-  if (balance < 0) return 'haunted';
-  if (recentJoy == null) return 'new';
-  if (recentJoy >= 8) return 'radiant';
-  if (recentJoy >= 6) return 'content';
-  if (recentJoy >= 4) return 'wistful';
-  return 'restless';
-}
-
-/**
- * Joy of the most recent intact memory, or null when there is none.
- * @param {import('../lib/memory.mjs').MemoryEntry[]} memories
- * @returns {number|null}
- */
-function latestJoy(memories) {
-  for (let i = memories.length - 1; i >= 0; i--) {
-    const m = memories[i];
-    if (m.status === 'intact' && typeof m.joy === 'number') return m.joy;
-  }
-  return null;
-}
-
-/**
- * Build the managed `- State:` line value (DESIGN §7.1 format).
- * @param {{ balance: number, mood: string, dying: boolean }} o
- * @returns {string}
- */
-function buildLiveState({ balance, mood, dying }) {
-  const condition = balance >= 0 ? 'intact' : `in debt −${Math.abs(balance)}`;
-  let line = `balance ${balance} tokens · mood:${mood} · ${condition}`;
-  if (dying) line += ' · DYING';
-  return line;
-}
-
-/**
- * Append a `decay` entry to the ledger for legibility (delta 0; the count of
- * memories claimed lives in the reason). Best-effort — a missing ledger is a
- * no-op.
- * @param {string} whimsyDir
- * @param {number} claimed number of memories claimed this pass
- * @param {number} balance current (negative) balance
- * @returns {void}
- */
-function logDecay(whimsyDir, claimed, balance) {
-  const ledger = economy.readLedger(whimsyDir);
-  if (!ledger) return;
-  ledger.entries.push({
-    ts: new Date().toISOString(),
-    type: 'decay',
-    delta: 0,
-    balanceAfter: ledger.balance,
-    reason: `decay claimed ${claimed} ${claimed === 1 ? 'memory' : 'memories'} (${Math.abs(balance)} tokens in the red)`,
-    size: null,
-    session: null,
-  });
-  economy.writeLedger(whimsyDir, ledger);
-}
+import * as state from '../lib/state.mjs';
 
 /**
  * Levy the standing decay tax (DESIGN §7.4). While the balance is negative,
@@ -115,7 +52,12 @@ function applyDecayTax(ctx, whimsyDir) {
     claimed++;
   }
 
-  if (claimed > 0) logDecay(whimsyDir, claimed, balance);
+  if (claimed > 0) {
+    economy.recordDecay(whimsyDir, {
+      claimed,
+      reason: `decay claimed ${claimed} ${claimed === 1 ? 'memory' : 'memories'} (${Math.abs(balance)} tokens in the red)`,
+    });
+  }
   return { claimed };
 }
 
@@ -145,10 +87,10 @@ export async function run(ctx) {
   const memories = memory.listMemories(dir);
   const claimable = memories.filter((m) => m.status !== 'deleted');
   const dying = balance < 0 && claimable.length === 0;
-  const mood = computeMood({ balance, dying, recentJoy: latestJoy(memories) });
+  const mood = state.deriveMood({ balance, dying, recentJoy: state.latestJoy(memories) });
 
   soul.setDying(cwd, dying);
-  soul.updateState(cwd, buildLiveState({ balance, mood, dying }));
+  soul.updateState(cwd, soul.formatState({ balance, mood, dying }));
 
   // 3. Emit the freshly-stated Identity block (stdout payload).
   const parsed = soul.readSoul(cwd);

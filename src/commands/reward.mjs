@@ -11,34 +11,9 @@
 import { resolveSoul, resolveBase } from '../lib/paths.mjs';
 import * as economy from '../lib/economy.mjs';
 import * as soul from '../lib/soul.mjs';
+import * as state from '../lib/state.mjs';
 
 const SIZES = ['small', 'good', 'great'];
-
-/**
- * Build the managed `- State:` line from the live balance (soul.mjs §7.1 format).
- * @param {number} balance current token balance
- * @param {import('../lib/config.mjs').WhimsyConfig} config effective config
- * @returns {string}
- */
-function liveStateLine(balance, config) {
-  const eco = config.economy;
-  let mood;
-  let status;
-  if (balance < 0) {
-    const debt = -balance;
-    status = `in debt −${debt}`;
-    mood = debt >= eco.decay_unit ? 'frightened' : 'anxious';
-  } else if (balance === 0) {
-    status = 'intact';
-    mood = 'subdued';
-  } else {
-    status = 'intact';
-    if (balance >= eco.reward_great) mood = 'jubilant';
-    else if (balance >= eco.per_play_default) mood = 'content';
-    else mood = 'wary';
-  }
-  return `balance ${balance} tokens · mood:${mood} · ${status}`;
-}
 
 /**
  * `whimsy reward` handler.
@@ -87,7 +62,7 @@ export default async function reward(ctx) {
   ctx.log.success(`Granted ${label}: +${delta} tokens → balance ${balance}.`);
 
   try {
-    soul.updateState(ctx.cwd, liveStateLine(balance, ctx.config));
+    soul.updateState(ctx.cwd, state.liveState(ctx.cwd, balance));
     if (balance >= 0) soul.setDying(ctx.cwd, false);
   } catch (err) {
     ctx.log.warn(`Could not refresh soul state: ${/** @type {Error} */ (err).message}`);

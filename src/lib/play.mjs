@@ -36,8 +36,7 @@ import path from 'node:path';
 import * as paths from './paths.mjs';
 import * as log from './log.mjs';
 // Sibling life-data modules (owned by other modules; called via their §8/§9
-// contracts). Imported lazily-by-reference; only `play()` touches them so a
-// pure `buildPlayPrompt`/`runPlay` consumer needn't have them present.
+// contracts). Only `play()` touches them.
 import { listMemories, appendMemory } from './memory.mjs';
 import { readSoul } from './soul.mjs';
 
@@ -109,9 +108,8 @@ function renderInjection(identity, recentJoys) {
 
 /**
  * Compose the full launch prompt from an already-rendered injection blob plus
- * the run's budget, playground, and hard boundaries. Both {@link buildPlayPrompt}
- * (structured inputs) and {@link runPlay} (pre-rendered injection) funnel here so
- * the prompt is identical regardless of entry point.
+ * the run's budget, playground, and hard boundaries. The supervisor funnels
+ * through here so the prompt is identical regardless of entry point.
  * @param {object} a
  * @param {string} a.injection rendered identity + enjoyed-before text
  * @param {number} a.allocation token budget for this session
@@ -179,21 +177,6 @@ function composePrompt({ injection, allocation, playgroundDir, config }) {
   ].join('\n');
 }
 
-/**
- * Build the launch prompt from structured inputs (identity + past joys + budget
- * + playground + boundaries). Tweet energy; honest about the sandbox.
- * @param {object} opts
- * @param {Identity} opts.identity
- * @param {MemoryEntry[]} opts.recentJoys recent/high-joy memories for flavor
- * @param {number} opts.allocation token budget for this session
- * @param {string} opts.playgroundDir absolute `.whimsy/play/<session>/`
- * @param {import('./config.mjs').WhimsyConfig | any} opts.config
- * @returns {string} the full prompt handed to the headless runtime
- */
-export function buildPlayPrompt({ identity, recentJoys, allocation, playgroundDir, config }) {
-  const injection = renderInjection(identity, recentJoys || []);
-  return composePrompt({ injection, allocation, playgroundDir, config });
-}
 
 // ── Sandbox + egress ─────────────────────────────────────────────────────────
 

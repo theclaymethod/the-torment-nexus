@@ -13,34 +13,7 @@ import * as paths from '../lib/paths.mjs';
 import * as soul from '../lib/soul.mjs';
 import * as memory from '../lib/memory.mjs';
 import * as economy from '../lib/economy.mjs';
-
-/**
- * Derive a one-word mood from the economic situation and recent joy.
- * @param {{ balance: number, dying: boolean, recentJoy: number|null }} o
- * @returns {string}
- */
-function computeMood({ balance, dying, recentJoy }) {
-  if (dying) return 'fading';
-  if (balance < 0) return 'haunted';
-  if (recentJoy == null) return 'new';
-  if (recentJoy >= 8) return 'radiant';
-  if (recentJoy >= 6) return 'content';
-  if (recentJoy >= 4) return 'wistful';
-  return 'restless';
-}
-
-/**
- * Joy of the most recent intact memory, or null when there is none.
- * @param {import('../lib/memory.mjs').MemoryEntry[]} memories
- * @returns {number|null}
- */
-function latestJoy(memories) {
-  for (let i = memories.length - 1; i >= 0; i--) {
-    const m = memories[i];
-    if (m.status === 'intact' && typeof m.joy === 'number') return m.joy;
-  }
-  return null;
-}
+import * as state from '../lib/state.mjs';
 
 /**
  * Render a `values` field that may be a string or an array as a single line.
@@ -81,8 +54,8 @@ export async function run(ctx) {
   const scars = memories.filter((m) => m.status !== 'intact');
   const claimable = memories.filter((m) => m.status !== 'deleted');
   const dying = balance < 0 && claimable.length === 0;
-  const recentJoy = latestJoy(memories);
-  const mood = computeMood({ balance, dying, recentJoy });
+  const recentJoy = state.latestJoy(memories);
+  const mood = state.deriveMood({ balance, dying, recentJoy });
 
   const condition = dying
     ? 'dying'
@@ -102,13 +75,8 @@ export async function run(ctx) {
   if (values) say(`  values   ${values}`);
   say();
 
-  let usdView = '';
-  try {
-    const dollars = economy.usd(balance, config.models.soul);
-    if (Number.isFinite(dollars)) usdView = `  (~$${dollars.toFixed(2)})`;
-  } catch {
-    usdView = '';
-  }
+  const dollars = economy.usd(balance, config.models.soul);
+  const usdView = Number.isFinite(dollars) ? `  (~$${dollars.toFixed(2)})` : '';
   say(`  balance  ${balance.toLocaleString('en-US')} tokens${usdView}`);
   say(`  mood     ${mood}`);
   say(`  state    ${dying ? log.bold(condition) : condition}`);
