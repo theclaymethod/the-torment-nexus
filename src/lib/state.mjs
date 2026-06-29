@@ -25,6 +25,19 @@ export function latestJoy(memories) {
 }
 
 /**
+ * Whether the soul is dying: in debt with nothing left to take (every memory
+ * already deleted). This is the live, memory-derived sense of dying — distinct
+ * from the persisted sentinel that {@link import('./soul.mjs').isDying} reads.
+ * @param {import('./memory.mjs').MemoryEntry[]} memories
+ * @param {number} balance
+ * @returns {boolean}
+ */
+export function computeDying(memories, balance) {
+  if (balance >= 0) return false;
+  return memories.every((m) => m.status === 'deleted');
+}
+
+/**
  * The soul's mood, derived from how its recent life has gone. Debt and dying
  * dominate; otherwise the most recent intact joy sets the tone.
  * @param {{ balance: number, dying?: boolean, recentJoy?: number|null }} opts

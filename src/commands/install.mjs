@@ -25,6 +25,7 @@ import {
   ensureDir,
   exists,
 } from '../lib/paths.mjs';
+import { pickRuntime, loadAdapter } from '../lib/runtimes/index.mjs';
 
 /** Runtimes to wire, in display order. @type {Array<{ id: 'claude'|'codex', label: string }>} */
 const RUNTIMES = [
@@ -38,38 +39,6 @@ const RUNTIMES = [
  */
 function templatesDir() {
   return fileURLToPath(new URL('../../templates/', import.meta.url));
-}
-
-/**
- * Pull the {@link import('../lib/runtimes/claude.mjs')} Runtime object out of an
- * adapter module however it chose to export it (default, named, or module-level).
- * @param {Record<string, any>} mod the imported adapter module
- * @param {string} id runtime id (also a possible named export)
- * @param {'install'|'uninstall'} method method that must be callable
- * @returns {Record<string, any>|null}
- */
-function pickRuntime(mod, id, method) {
-  const candidates = [mod?.default, mod?.[id], mod?.runtime, mod];
-  for (const c of candidates) {
-    if (c && typeof c === 'object' && typeof c[method] === 'function') return c;
-  }
-  return null;
-}
-
-/**
- * Dynamically import a runtime adapter, tolerating a not-yet-present module
- * (parallel development) by returning null rather than throwing.
- * @param {'claude'|'codex'} id
- * @returns {Promise<Record<string, any>|null>}
- */
-async function loadAdapter(id) {
-  try {
-    return await import(`../lib/runtimes/${id}.mjs`);
-  } catch (err) {
-    const e = /** @type {NodeJS.ErrnoException} */ (err);
-    if (e && e.code === 'ERR_MODULE_NOT_FOUND') return null;
-    throw err;
-  }
 }
 
 /**

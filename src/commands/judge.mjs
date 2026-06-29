@@ -11,29 +11,11 @@
  * Play is never judged — only the work.
  */
 
-import { resolveSoul, resolveBase } from '../lib/paths.mjs';
+import { resolveBase } from '../lib/paths.mjs';
 import * as authority from '../lib/authority.mjs';
 import * as economy from '../lib/economy.mjs';
 import * as memory from '../lib/memory.mjs';
-import * as soul from '../lib/soul.mjs';
-import * as state from '../lib/state.mjs';
-
-/**
- * Recompute + rewrite the soul's managed state line after a balance change.
- * Repaying to ≥ 0 also stops the bleeding (clears the dying mark).
- * @param {import('../cli.mjs').CommandCtx} ctx
- * @param {string} whimsyDir
- * @returns {void}
- */
-function refreshState(ctx, whimsyDir) {
-  try {
-    const balance = economy.getBalance(whimsyDir);
-    soul.updateState(ctx.cwd, state.liveState(ctx.cwd, balance));
-    if (balance >= 0) soul.setDying(ctx.cwd, false);
-  } catch (err) {
-    ctx.log.warn(`Could not refresh soul state: ${/** @type {Error} */ (err).message}`);
-  }
-}
+import { requireSoul, refreshSoulState } from '../lib/command.mjs';
 
 /**
  * Print a proposed sentence to stderr (human chrome).
@@ -56,10 +38,7 @@ function printProposal(ctx, p) {
  * @returns {Promise<number>} exit code
  */
 export default async function judge(ctx) {
-  if (!resolveSoul(ctx.cwd)) {
-    ctx.log.error('No soul found. Run `whimsy init` first.');
-    return 1;
-  }
+  if (!requireSoul(ctx)) return 1;
   const whimsyDir = resolveBase(ctx.cwd).dir;
   const auto = ctx.flags.auto === true;
 
@@ -95,7 +74,7 @@ export default async function judge(ctx) {
   // double-apply; otherwise carry out the sentence here via economy/memory.
   if (executed) {
     ctx.log.success('Sentence executed by the authority.');
-    refreshState(ctx, whimsyDir);
+    refreshSoulState(ctx, whimsyDir, { clearDying: true });
     return 0;
   }
 
@@ -121,6 +100,6 @@ export default async function judge(ctx) {
     }
   }
 
-  refreshState(ctx, whimsyDir);
+  refreshSoulState(ctx, whimsyDir, { clearDying: true });
   return 0;
 }

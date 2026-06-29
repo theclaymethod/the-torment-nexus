@@ -16,16 +16,6 @@ import * as economy from '../lib/economy.mjs';
 import * as state from '../lib/state.mjs';
 
 /**
- * Render a `values` field that may be a string or an array as a single line.
- * @param {string|string[]|undefined} values
- * @returns {string}
- */
-function renderValues(values) {
-  if (Array.isArray(values)) return values.join(', ');
-  return values || '';
-}
-
-/**
  * Run `whimsy status`.
  * @param {import('../cli.mjs').CommandCtx} ctx
  * @returns {Promise<number>} exit code
@@ -52,8 +42,7 @@ export async function run(ctx) {
   const balance = economy.getBalance(dir);
   const memories = memory.listMemories(dir);
   const scars = memories.filter((m) => m.status !== 'intact');
-  const claimable = memories.filter((m) => m.status !== 'deleted');
-  const dying = balance < 0 && claimable.length === 0;
+  const dying = state.computeDying(memories, balance);
   const recentJoy = state.latestJoy(memories);
   const mood = state.deriveMood({ balance, dying, recentJoy });
 
@@ -71,7 +60,7 @@ export async function run(ctx) {
   say(`  ${log.bold(name)}${identity.essence ? ` — ${identity.essence}` : ''}`);
   say(log.dim(`  soul: ${ref.scope} · ${ref.path}`));
   if (identity.voice) say(`  voice    ${identity.voice}`);
-  const values = renderValues(identity.values);
+  const values = soul.formatValues(identity.values);
   if (values) say(`  values   ${values}`);
   say();
 

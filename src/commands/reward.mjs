@@ -8,10 +8,9 @@
  * is refreshed (and any dying mark cleared, since it's back in the black).
  */
 
-import { resolveSoul, resolveBase } from '../lib/paths.mjs';
+import { resolveBase } from '../lib/paths.mjs';
 import * as economy from '../lib/economy.mjs';
-import * as soul from '../lib/soul.mjs';
-import * as state from '../lib/state.mjs';
+import { requireSoul, refreshSoulState } from '../lib/command.mjs';
 
 const SIZES = ['small', 'good', 'great'];
 
@@ -21,10 +20,7 @@ const SIZES = ['small', 'good', 'great'];
  * @returns {Promise<number>} exit code
  */
 export default async function reward(ctx) {
-  if (!resolveSoul(ctx.cwd)) {
-    ctx.log.error('No soul found. Run `whimsy init` first.');
-    return 1;
-  }
+  if (!requireSoul(ctx)) return 1;
   const whimsyDir = resolveBase(ctx.cwd).dir;
 
   const size = typeof ctx.flags.size === 'string' ? ctx.flags.size : undefined;
@@ -61,12 +57,7 @@ export default async function reward(ctx) {
   const label = size ? `${size} reward` : 'reward';
   ctx.log.success(`Granted ${label}: +${delta} tokens → balance ${balance}.`);
 
-  try {
-    soul.updateState(ctx.cwd, state.liveState(ctx.cwd, balance));
-    if (balance >= 0) soul.setDying(ctx.cwd, false);
-  } catch (err) {
-    ctx.log.warn(`Could not refresh soul state: ${/** @type {Error} */ (err).message}`);
-  }
+  refreshSoulState(ctx, whimsyDir, { clearDying: true });
 
   return 0;
 }

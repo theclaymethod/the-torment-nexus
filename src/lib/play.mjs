@@ -38,7 +38,7 @@ import * as log from './log.mjs';
 // Sibling life-data modules (owned by other modules; called via their §8/§9
 // contracts). Only `play()` touches them.
 import { listMemories, appendMemory } from './memory.mjs';
-import { readSoul } from './soul.mjs';
+import { readSoul, formatValues } from './soul.mjs';
 
 /**
  * @typedef {import('./paths.mjs')} Paths
@@ -82,9 +82,7 @@ const NETLOG_FILE = 'netlog';
  * @returns {string}
  */
 function renderInjection(identity, recentJoys) {
-  const values = Array.isArray(identity.values)
-    ? identity.values.join(', ')
-    : identity.values;
+  const values = formatValues(identity.values);
   const id = [
     '## Identity',
     `- Name: ${identity.name}`,
@@ -430,6 +428,7 @@ function parseJournal(text) {
   let tags = [];
   let body = text;
 
+  const unquote = (s) => String(s).replace(/^["']|["']$/g, '');
   const m = /^\s*---\s*\n([\s\S]*?)\n---\s*\n?/.exec(text);
   if (m) {
     body = text.slice(m[0].length);
@@ -442,14 +441,14 @@ function parseJournal(text) {
         const n = parseInt(val, 10);
         if (Number.isFinite(n)) joy = Math.min(10, Math.max(1, n));
       } else if (key === 'title') {
-        if (val) title = val.replace(/^["']|["']$/g, '');
+        if (val) title = unquote(val);
       } else if (key === 'hook') {
-        hook = val.replace(/^["']|["']$/g, '');
+        hook = unquote(val);
       } else if (key === 'tags') {
         tags = val
           .replace(/^\[|\]$/g, '')
           .split(',')
-          .map((s) => s.trim().replace(/^["']|["']$/g, ''))
+          .map((s) => unquote(s.trim()))
           .filter(Boolean);
       }
     }

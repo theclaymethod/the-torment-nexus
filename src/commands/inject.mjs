@@ -85,8 +85,7 @@ export async function run(ctx) {
   // 2. Recompute live state from the (post-decay) ledger + memories.
   const balance = economy.getBalance(dir);
   const memories = memory.listMemories(dir);
-  const claimable = memories.filter((m) => m.status !== 'deleted');
-  const dying = balance < 0 && claimable.length === 0;
+  const dying = state.computeDying(memories, balance);
   const mood = state.deriveMood({ balance, dying, recentJoy: state.latestJoy(memories) });
 
   soul.setDying(cwd, dying);

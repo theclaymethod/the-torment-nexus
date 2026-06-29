@@ -98,9 +98,7 @@ export function parseIdentity(raw) {
  * @returns {string} the block text (no trailing newline).
  */
 export function renderIdentityBlock(identity) {
-  const values = Array.isArray(identity.values)
-    ? identity.values.join(', ')
-    : identity.values || '';
+  const values = formatValues(identity.values);
   return [
     BEGIN,
     '## Identity',
@@ -120,6 +118,16 @@ export function renderIdentityBlock(identity) {
  * @param {{ balance: number, mood?: string, dying?: boolean }} opts
  * @returns {string}
  */
+/**
+ * Render a `values` field that may be a string or an array as a single line.
+ * @param {string|string[]|undefined} values
+ * @returns {string}
+ */
+export function formatValues(values) {
+  if (Array.isArray(values)) return values.join(', ');
+  return values || '';
+}
+
 export function formatState({ balance, mood = 'curious', dying = false }) {
   let condition;
   if (balance < 0) condition = `in debt −${Math.abs(balance)}`;
