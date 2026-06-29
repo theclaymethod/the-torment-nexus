@@ -1,18 +1,18 @@
-# whimsy play profile — installed at ~/.codex/whimsy-play.config.toml
+# whimsy play profile, installed at ~/.codex/whimsy-play.config.toml
 #
 # Used by the play supervisor:  codex exec --json --profile whimsy-play ...
 # Managed by `whimsy install`; removed by `whimsy uninstall`. Do not edit by hand.
 #
 # Placeholders below are substituted by the install/runtime code:
-#   {{SOUL_MODEL}}      — config.models.soul (the being itself)
-#   {{WHIMSY_DIR}}      — absolute path to the active .whimsy/ directory
-#   {{NETWORK_ACCESS}}  — config.play.network (true|false)
+#   {{SOUL_MODEL}}     , config.models.soul (the being itself)
+#   {{WHIMSY_DIR}}     , absolute path to the active .whimsy/ directory
+#   {{NETWORK_ACCESS}} , config.play.network (true|false)
 #
 # NOTE (empirical contract, DESIGN §12): Codex profiles are now separate files
 # (`~/.codex/<name>.config.toml` + `--profile <name>`); the old inline
 # `[profiles.*]` tables were removed. The keys below (`model`, `sandbox_mode`,
 # `[sandbox_workspace_write]` with `writable_roots` / `network_access`) follow the
-# documented current-Codex schema — verify against the targeted Codex version.
+# documented current-Codex schema, verify against the targeted Codex version.
 
 # Pin the soul model so play always runs as the being itself.
 model = "{{SOUL_MODEL}}"

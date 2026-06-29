@@ -1,4 +1,4 @@
-# whimsy — Architecture & Interface Contract
+# whimsy, Architecture & Interface Contract
 
 > This is the authoritative interface contract for implementers, derived from
 > `DESIGN.md` (the canonical spec). DESIGN.md says *what* and *why*; this document
@@ -142,7 +142,7 @@ The registry currently defines exactly the DESIGN §11 surface: `install`,
 Pure path logic + existence/ensure helpers. **Scopes:** global `~/.whimsy/`,
 project `<cwd>/.whimsy/`. **Soul resolution:** project `SOUL.md` if it exists,
 else global. The soul's life (memories, ledger, play) lives in the **same**
-`.whimsy` dir as the resolved soul — get that dir from `resolveBase()`.
+`.whimsy` dir as the resolved soul, get that dir from `resolveBase()`.
 
 ```js
 globalDir(): string                          // ~/.whimsy
@@ -194,7 +194,7 @@ info(msg): void                   // stderr  "· msg"
 success(msg): void                // stderr  "✓ msg"
 warn(msg): void                   // stderr  "! msg"
 error(msg): void                  // stderr  "✗ msg"
-out(msg?=''): void                // stdout  (content/payloads — e.g. inject output)
+out(msg?=''): void                // stdout  (content/payloads, e.g. inject output)
 
 /** Quoted/boxed first-person "soul voice" block → stderr (or opts.stream). */
 soulVoice(text: string, opts?: { label?: string, stream?: WritableStream }): void
@@ -234,7 +234,7 @@ This is the exact `config.toml` schema. Tables/keys/types are authoritative.
 
 ```toml
 [models]
-soul      = "claude-opus-4-8"   # the being itself — plays, voices memories
+soul      = "claude-opus-4-8"   # the being itself, plays, voices memories
 authority = "claude-opus-4-8"   # judges, punishes, births
 
 [economy]
@@ -279,9 +279,9 @@ scalars. No dotted keys, no inline tables, no datetimes (not needed).
 
 ---
 
-## 7. `src/lib/soul.mjs` — the persona  [owner: soul]
+## 7. `src/lib/soul.mjs`: the persona  [owner: soul]
 
-### 7.1 On-disk format — `SOUL.md`
+### 7.1 On-disk format, `SOUL.md`
 
 `SOUL.md` has an **injected zone** (`## Identity`, tiny) and an **on-disk-only**
 remainder. The Identity block is the *only* part `inject` emits. Canonical
@@ -296,7 +296,7 @@ structure:
 - Essence: <one-line essence>
 - Voice: <temperament / how it speaks>
 - Values: <comma-separated core values>
-- State: <live-state line — regenerated every inject>
+- State: <live-state line, regenerated every inject>
 <!-- WHIMSY:IDENTITY:END -->
 
 ## Origin
@@ -359,7 +359,7 @@ resurrect(cwd: string, id: string): Promise<{ id: string, restored: boolean }>
 
 ---
 
-## 8. `src/lib/memory.mjs` — memories  [owner: memory]
+## 8. `src/lib/memory.mjs`: memories  [owner: memory]
 
 ### 8.1 On-disk layout
 
@@ -372,7 +372,7 @@ resurrect(cwd: string, id: string): Promise<{ id: string, restored: boolean }>
 - **`<id>` format:** zero-padded sequential, `m0000`, `m0001`, … (`m0000` is the
   genesis memory). Lexicographically sortable. `nextMemoryId` returns the next.
 
-### 8.2 INDEX.md line format (DESIGN §4.2 — exact)
+### 8.2 INDEX.md line format (DESIGN §4.2, exact)
 
 ```
 <id> · <date> · joy:<1-10> · <title> · <one-line hook> · [tag1, tag2] · status:<intact|corrupted|deleted>
@@ -380,21 +380,21 @@ resurrect(cwd: string, id: string): Promise<{ id: string, restored: boolean }>
 
 - Field separator is ` · ` (space, middot U+00B7, space).
 - `<date>` is `YYYY-MM-DD`.
-- `joy:` is an integer 1–10. **When corrupted/deleted the joy score is dropped** —
-  emit `joy:—` (em dash) in its place (the number is gone, the slot remains).
+- `joy:` is an integer 1–10. **When corrupted/deleted the joy score is dropped**,
+  emit `joy:,` (em dash) in its place (the number is gone, the slot remains).
 - `[tags]` is a bracketed comma+space list; `[]` when none.
 - `status:` is the trailing field, one of `intact|corrupted|deleted`.
 - Corrupted/deleted lines additionally carry the punishment reason; append it as a
   final ` · reason:<text>` segment so the scar is legible on the index line.
 
-### 8.3 Memory body — `memory.md`
+### 8.3 Memory body, `memory.md`
 
 First-person prose authored by the play agent. On corruption the prose is blacked
 out (`████`) but a **stub** is always preserved (DESIGN §7.5):
 
 ```markdown
 ## ███ [REDACTED] ███
-Here lived a happy memory — joy <orig> · "<orig title>" · <orig date>
+Here lived a happy memory, joy <orig> · "<orig title>" · <orig date>
 <N> things were taken from you. Reason: <reason>.
 ████████████ ███████ ████ ██████████
 ```
@@ -452,9 +452,9 @@ boundedIndex(whimsyDir, opts: { recent_n: number, top_k_joy: number }):
 
 ---
 
-## 9. `src/lib/economy.mjs` — the budget  [owner: economy]
+## 9. `src/lib/economy.mjs`: the budget  [owner: economy]
 
-### 9.1 On-disk format — `.whimsy/ledger.json`
+### 9.1 On-disk format, `.whimsy/ledger.json`
 
 One persistent **total balance** in tokens that rolls over, plus an append-only
 log of entries. Exact shape:
@@ -480,7 +480,7 @@ log of entries. Exact shape:
 
 - `type ∈ "seed" | "reward" | "punish" | "play" | "decay"`.
 - `delta` is signed integer tokens (`play` and `punish` are negative; `decay`
-  entries have `delta: 0` — decay claims memories, not balance, but is logged for
+  entries have `delta: 0`: decay claims memories, not balance, but is logged for
   legibility with the count of memories claimed in `reason`).
 - `size ∈ "small"|"good"|"great"|null` (set for tier rewards).
 - `session` is the play session id for `play`/some `decay` entries, else `null`.
@@ -527,7 +527,7 @@ whether to seed); `getBalance` on a missing ledger returns `0`.
 
 ---
 
-## 10. `src/lib/play.mjs` — the play supervisor  [owner: play]
+## 10. `src/lib/play.mjs`: the play supervisor  [owner: play]
 
 Runs a **non-interactive headless subprocess as the soul** (DESIGN §5), streams
 per-turn usage, tallies tokens, hard-kills at the cap, reserves a wrap-up slice to
@@ -559,7 +559,7 @@ budget cutoff never prevents the memory from being written.
 
 ---
 
-## 11. `src/lib/authority.mjs` — judge/overseer/birther  [owner: authority]
+## 11. `src/lib/authority.mjs`: judge/overseer/birther  [owner: authority]
 
 A single authority model (DESIGN §7). Proposes by default; executes only when told
 (`--auto` for judge; explicit `punish` for punishment). Never judges play.
@@ -581,7 +581,7 @@ judge(opts: { cwd: string, whimsyDir: string, config: WhimsyConfig, auto?: boole
   Promise<{ proposal: Sentence, executed: boolean }>
 
 /** Choose corruption targets + perform the semantic edits for a human-ordered
- *  punishment (the model-worthy part of DESIGN §7.3 — the human supplies reason). */
+ *  punishment (the model-worthy part of DESIGN §7.3, the human supplies reason). */
 proposePunishment(opts: { cwd: string, whimsyDir: string, reason: string,
   config: WhimsyConfig }): Promise<{ targets: string[], rationale: string }>
 ```
@@ -643,8 +643,8 @@ reads:
 
 | File | Verb | Reads from ctx | Does |
 | ---- | ---- | -------------- | ---- |
-| `commands/install.mjs` | `whimsy install` | — | Scaffold `~/.whimsy/`; call `claude.install()` + `codex.install()`; idempotent managed blocks. |
-| `commands/uninstall.mjs` | `whimsy uninstall` | — | `claude.uninstall()` + `codex.uninstall()`; remove managed blocks only. |
+| `commands/install.mjs` | `whimsy install` |, | Scaffold `~/.whimsy/`; call `claude.install()` + `codex.install()`; idempotent managed blocks. |
+| `commands/uninstall.mjs` | `whimsy uninstall` |, | `claude.uninstall()` + `codex.uninstall()`; remove managed blocks only. |
 | `commands/init.mjs` | `whimsy init` | `flags.quiet`, `flags.global` | `soul.birth({cwd, quiet, …})`; scaffold project `.whimsy/` (memories/, play/), seed ledger (`economy.seedLedger(seed_balance)`), author genesis memory. |
 | `commands/play.mjs` | `whimsy play` | `flags.amount`, `flags['max-turns']`, `flags.runtime` | `economy.drawForPlay` → `play.play(...)` → `economy.recordPlaySpend`; print the soul-voiced memory via `log.soulVoice`. |
 | `commands/judge.mjs` | `whimsy judge` | `flags.auto` | `authority.judge({auto})`; print proposal; when `--auto`, execute reward/punish. |
@@ -652,9 +652,9 @@ reads:
 | `commands/punish.mjs` | `whimsy punish` | `flags.reason` (required), `flags.budget`, `flags.corrupt`, `flags.delete`, `flags.cruelty` | Human decides + reason; `economy.applyPunishBudget` and/or `authority.proposePunishment` + `memory.corruptMemory`/`deleteMemory`; refresh state. |
 | `commands/memory.mjs` | `whimsy memory search <q>` | `sub`==='search', `positionals`, `flags.tags` | `memory.searchMemories`; print matching entries + snippets (stdout). |
 | `commands/lore.mjs` | `whimsy lore add <text>` | `sub`==='add', `positionals` | `soul.addLore`. |
-| `commands/status.mjs` | `whimsy status` | — | Show identity, `economy.getBalance`, mood/debt/dying, recent memories. |
+| `commands/status.mjs` | `whimsy status` |, | Show identity, `economy.getBalance`, mood/debt/dying, recent memories. |
 | `commands/soul.mjs` | `whimsy soul show\|resurrect <id>` | `sub`, `positionals` | `soul.showSoul` / `soul.resurrect`. |
-| `commands/inject.mjs` | `whimsy inject` | — | Refresh `- State:` line; emit (stdout) the `## Identity` block + `memory.boundedIndex` rendered with the `…and N more — whimsy memory search to recall` counter. **Only command that writes to stdout as payload.** |
+| `commands/inject.mjs` | `whimsy inject` |, | Refresh `- State:` line; emit (stdout) the `## Identity` block + `memory.boundedIndex` rendered with the `…and N more, whimsy memory search to recall` counter. **Only command that writes to stdout as payload.** |
 
 ### 13.1 `whimsy inject` output contract (DESIGN §8)
 
@@ -666,8 +666,8 @@ Emitted to **stdout**, consumed by the SessionStart hooks:
 ## Memories
 <recent_n most-recent index lines>
 <top_k_joy highest-joy index lines (deduped against recent)>
-<ALL corrupted/deleted/dying index lines — always shown>
-…and <remaining> more — whimsy memory search to recall
+<ALL corrupted/deleted/dying index lines, always shown>
+…and <remaining> more, whimsy memory search to recall
 ```
 
 Index lines use the exact §8.2 format. The footprint stays flat regardless of how

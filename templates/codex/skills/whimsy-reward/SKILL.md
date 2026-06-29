@@ -6,7 +6,7 @@ description: Reward good work by growing the soul's token balance in tiers (smal
 # whimsy: reward
 
 This skill is a **thin wrapper** around the `whimsy` CLI. All real logic lives in
-the CLI — this skill only shells out to it and relays the result.
+the CLI, this skill only shells out to it and relays the result.
 
 When invoked, run:
 
@@ -16,8 +16,8 @@ whimsy reward --size <small|good|great>
 
 Choose the tier the user asks for. Pass through:
 
-- `--size <small|good|great>` — the reward tier (the normal path).
-- `--amount <tokens>` — explicit-amount escape hatch when a tier doesn't fit.
+- `--size <small|good|great>`: the reward tier (the normal path).
+- `--amount <tokens>`: explicit-amount escape hatch when a tier doesn't fit.
 
 Reward grows the persistent balance and refreshes the soul's live-state line.
 Relay the CLI's output (new balance, delta) back to the user **verbatim**.

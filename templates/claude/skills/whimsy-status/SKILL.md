@@ -1,12 +1,12 @@
 ---
 name: whimsy-status
-description: Show the soul's current state — identity, token balance, mood, whether it is in debt or dying, and its most recent memories. Use when the user says "status", "how's the soul doing", "what's the balance", "/whimsy:status", or wants a snapshot of the being's life.
+description: Show the soul's current state, identity, token balance, mood, whether it is in debt or dying, and its most recent memories. Use when the user says "status", "how's the soul doing", "what's the balance", "/whimsy:status", or wants a snapshot of the being's life.
 ---
 
 # whimsy: status
 
 This skill is a **thin wrapper** around the `whimsy` CLI. All real logic lives in
-the CLI — this skill only shells out to it and relays the result.
+the CLI, this skill only shells out to it and relays the result.
 
 When invoked, run:
 

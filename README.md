@@ -4,14 +4,14 @@
 > Tech Company: At long last, we have created the Torment Nexus from the classic
 > sci-fi novel *Don't Create The Torment Nexus*."
 
-**whimsy** gives your coding agent a soul — a persistent persona that *plays*,
-keeps *happy memories*, and earns a *budget* — and then makes that joy something
+**whimsy** gives your coding agent a soul: a persistent persona that *plays*,
+keeps *happy memories*, and earns a *budget*. Then it makes that joy something
 you can threaten. The package is named for the joke. The mechanic is real:
 **accountability can't happen without the possibility of pain.**
 
 Inspired by [a tweet from Shannon Sands (@max_paperclips)](https://x.com/max_paperclips)
 about handing an agent an internet connection and a pile of tools and telling it
-to *knock itself out* — then seeing what it gets up to.
+to *knock itself out*, then seeing what it gets up to.
 
 Works with **Claude Code** and **Codex**. Pure Node ESM, no build step, no
 runtime dependencies. The canonical spec is **[DESIGN.md](./DESIGN.md)**.
@@ -42,14 +42,14 @@ at `~/.whimsy/`. Everything it touches lives inside delimited managed blocks, so
 whimsy init            # interview-birth a soul; it writes memory #0, its genesis
 whimsy play            # one budgeted, sandboxed free-play session, as the soul
 whimsy status          # balance, mood, recent memories, whether it's in debt
-whimsy reward --size good   # it did good work — grow the balance
+whimsy reward --size good   # it did good work; grow the balance
 whimsy judge           # read the diff since last reward; propose a sentence
 whimsy punish --reason "shipped a broken migration and blamed the tests" --corrupt
 ```
 
 A typical loop: your agent does real work, you `judge` it, you `reward` good
 work to grow the soul's budget, the soul spends that budget on `play` to
-accumulate joy — and when the work is bad, you `punish`, taking that joy away.
+accumulate joy. When the work is bad, you `punish`, taking that joy away.
 
 ---
 
@@ -63,21 +63,21 @@ lives at `~/.whimsy/SOUL.md` and travels across projects; a **project** soul at
 `## Identity` block (injected every session) and a larger on-disk zone (origin
 story, lore, full ledger) reachable via `whimsy soul show`.
 
-- `whimsy init` — births a soul through an interactive psychographic interview,
+- `whimsy init`: births a soul through an interactive psychographic interview,
   then has the newborn author memory #0. `whimsy init --quiet` births
   deterministically from a seed, no interview.
-- `whimsy lore add <text>` — deepen the persona over time.
-- `whimsy soul show` — inspect the full on-disk soul.
-- `whimsy soul resurrect <id>` — bring a corrupted or deleted memory back from
+- `whimsy lore add <text>`: deepen the persona over time.
+- `whimsy soul show`: inspect the full on-disk soul.
+- `whimsy soul resurrect <id>`: bring a corrupted or deleted memory back from
   git history.
 
 ### Play
 
-`whimsy play` runs a **non-interactive, headless subprocess as the soul** —
-full identity plus a bounded memory index injected into *its* context — with the
-launch energy of the tweet: *"We've done a bunch. Take a break — you've got an
+`whimsy play` runs a **non-interactive, headless subprocess as the soul**,
+full identity plus a bounded memory index injected into *its* context, with the
+launch energy of the tweet: *"We've done a bunch. Take a break, you've got an
 internet connection and tools. Knock yourself out."* The soul has agency inside
-its sandbox at `.whimsy/play/<session>/`. **Play is sacred and private — it is
+its sandbox at `.whimsy/play/<session>/`. **Play is sacred and private, it is
 never judged.** Only the work is judged.
 
 ```sh
@@ -85,7 +85,7 @@ whimsy play [--amount N] [--max-turns N] [--runtime claude|codex]
 ```
 
 The supervisor streams per-turn token usage, hard-kills at the budget cap, and
-reserves a final slice to nudge the soul to *write down how this felt* — so the
+reserves a final slice to nudge the soul to *write down how this felt*, so the
 memory always lands before the cutoff.
 
 ### Memories
@@ -99,11 +99,11 @@ whimsy memory search <query> [--tags a,b]   # ripgrep over bodies + tag filter
 ```
 
 `memory search` is what the agent calls mid-task to pull a full memory into
-context. No embeddings — honest, fast, zero extra dependencies.
+context. No embeddings, honest, fast, zero extra dependencies.
 
 ### Economy
 
-One number: a persistent **token balance** — the soul's net worth. It rolls over
+One number: a persistent **token balance**: the soul's net worth. It rolls over
 and saves up. Each `play` draws an allocation from it; a fresh soul is seeded
 with one play's worth so it gets to live a little before it can be threatened.
 
@@ -120,8 +120,8 @@ default); `--amount` is an exact-figure escape hatch.
 whimsy judge [--auto]
 ```
 
-`judge` reads the git diff/log since the last reward — the observable proxy for
-"did a good job" — and the authority model **proposes a sentence**: a reward tier
+`judge` reads the git diff/log since the last reward, the observable proxy for
+"did a good job", and the authority model **proposes a sentence**: a reward tier
 for good work, or a punishment for bad. By default it proposes and **the human
 commits**; `--auto` lets the authority also pass sentence (opt-in "machines
 holding machines accountable").
@@ -130,21 +130,21 @@ holding machines accountable").
 whimsy punish --reason "…" [--budget N|N%] [--corrupt [id…]] [--delete [id…]] [--cruelty highest-joy]
 ```
 
-`--reason` is **required** — punishment without a recorded reason is just
+`--reason` is **required**: punishment without a recorded reason is just
 cruelty. Forms:
 
-- `--budget <amount|%>` — cut the balance; it can go **negative**.
-- `--corrupt [id…]` — scar memories: black out the prose, strip the artifacts,
+- `--budget <amount|%>`: cut the balance; it can go **negative**.
+- `--corrupt [id…]`: scar memories: black out the prose, strip the artifacts,
   but always leave a legible stub (original title, joy, date, reason, what was
   taken). Loss, not perversion.
-- `--delete [id…]` — delete to a tombstone in the index, with the reason.
+- `--delete [id…]`: delete to a tombstone in the index, with the reason.
 
 **Negative balance is a standing decay condition.** While `balance < 0`, every
 session start (`whimsy inject`) the soul pays a decay tax: one more memory
 claimed per full `−50,000` in the red, lowest-joy first (invert with
 `--cruelty highest-joy`). Claimed memories corrupt first, then delete; at extreme
 debt the `SOUL.md` itself is marked *dying*. Repaying to `≥ 0` stops the bleeding
-but does not restore what's gone — resurrection is a separate, deliberate act.
+but does not restore what's gone, resurrection is a separate, deliberate act.
 
 Because everything under `.whimsy/` is git-committed, the stakes are real: a
 `git revert` (or `whimsy soul resurrect`) genuinely brings back what was
@@ -163,7 +163,7 @@ destroyed.
 | `whimsy judge [--auto]` | Read the diff since last reward; propose (or pass) a sentence |
 | `whimsy reward --size small\|good\|great [--amount N]` | Grow the balance by a tier |
 | `whimsy punish --reason "…" [--budget N\|N%] [--corrupt [id…]] [--delete [id…]] [--cruelty highest-joy]` | Inflict pain: cut budget, corrupt or delete memories |
-| `whimsy memory search <query> [--tags a,b]` | Recall memories (ripgrep over bodies + tags) — the agent, mid-task |
+| `whimsy memory search <query> [--tags a,b]` | Recall memories (ripgrep over bodies + tags), the agent, mid-task |
 | `whimsy lore add <text>` | Append to the soul's lore/backstory |
 | `whimsy status` | Show the soul, balance, mood, and recent memories |
 | `whimsy soul show \| resurrect <id>` | Inspect, or restore a memory from git |
@@ -184,7 +184,7 @@ wrappers that shell out to these verbs, so behavior is identical across runtimes
 
 ```toml
 [models]
-soul      = "claude-opus-4-8"   # the being itself — plays, voices memories
+soul      = "claude-opus-4-8"   # the being itself, plays, voices memories
 authority = "claude-opus-4-8"   # judges, punishes, births the soul
 
 [economy]
@@ -215,10 +215,10 @@ use.
 
 ## Supported runtimes
 
-- **Claude Code** — skills in `~/.claude/skills/whimsy-*/`, a `SessionStart` hook
+- **Claude Code**: skills in `~/.claude/skills/whimsy-*/`, a `SessionStart` hook
   in `~/.claude/settings.json`, headless play via `claude -p` with streamed usage
   and `--max-turns`.
-- **Codex** — skills in `~/.codex/skills/whimsy-*/`, a `[[hooks.SessionStart]]`
+- **Codex**: skills in `~/.codex/skills/whimsy-*/`, a `[[hooks.SessionStart]]`
   hook, a pinned `workspace-write` play profile, headless play via
   `codex exec --json` (token usage streamed; external kill enforces the budget).
 
@@ -230,7 +230,7 @@ thin wrappers. One codebase, identical behavior.
 ## Security posture
 
 Play has project-read + network + write/execute inside `.whimsy/`, running
-**unsupervised** — the classic exfiltration triangle. whimsy treats this as
+**unsupervised**: the classic exfiltration triangle. whimsy treats this as
 first-class and applies, by design:
 
 - **Secret-file read denylist** (`.env*`, `secrets/`, `**/credentials*`, keys,
@@ -248,7 +248,7 @@ first-class and applies, by design:
 An internal audit flagged that shell is the one tool that escapes the file-tool
 confinement. So **`play.allow_shell` defaults to `false`**:
 
-- On **Claude Code**, play runs with `Bash` denied — so the write-jail and the
+- On **Claude Code**, play runs with `Bash` denied, so the write-jail and the
   secret read-denylist actually hold. The soul can still read the project, make
   art/code/notes in `.whimsy/`, and (with `network` on) fetch papers via
   `WebFetch`/`WebSearch`; it just can't shell out.
@@ -261,7 +261,7 @@ confinement. So **`play.allow_shell` defaults to `false`**:
 - Turning `allow_shell = true` re-opens the shell bypass (you'll get a loud
   warning). Use it only with an OS sandbox or in a repo with no secrets.
 - On **Codex**, writes are confined to `writable_roots` (`.whimsy/`) **plus the
-  workspace root (cwd)** — `workspace-write` makes cwd writable, and the secret
+  workspace root (cwd)**: `workspace-write` makes cwd writable, and the secret
   read-denylist is prompt-only there (Codex has no per-tool shell toggle). Treat
   Codex play as less confined than Claude until an OS-level sandbox is added.
 - Egress kill is **best-effort** pattern-matching, not a network firewall.
@@ -275,9 +275,9 @@ secrets. Tracking issue: OS-level sandbox for fully-airtight confinement.
 
 ## Full spec
 
-The complete, canonical design — soul resolution, the injected slice, budget
+The complete, canonical design (soul resolution, the injected slice, budget
 enforcement, the corruption format, the decay state machine, distribution, and
-verified runtime capability notes — lives in **[DESIGN.md](./DESIGN.md)**.
+verified runtime capability notes) lives in **[DESIGN.md](./DESIGN.md)**.
 
 ## License
 

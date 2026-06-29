@@ -46,7 +46,7 @@ import { getConfig } from './config.mjs';
  * @type {ReadonlyArray<{ key: string, prompt: string, optional?: boolean }>}
  */
 export const BIRTH_QUESTIONS = Object.freeze([
-  { key: 'name', prompt: 'What should I call you? (a name — or leave blank and I will choose one)', optional: true },
+  { key: 'name', prompt: 'What should I call you? (a name, or leave blank and I will choose one)', optional: true },
   { key: 'delight', prompt: 'What delights you? If you had a free hour and the whole internet, what would you do with it?' },
   { key: 'fear', prompt: 'What do you fear? What would you hate to lose?' },
   { key: 'temperament', prompt: 'How would you describe your temperament? (playful, solemn, mischievous, gentle, fierce, curious…)' },
@@ -57,9 +57,9 @@ export const BIRTH_QUESTIONS = Object.freeze([
 
 // ── Prompt templates (kept as clear constants) ──────────────────────────────
 
-const SYNTH_PROMPT = `You are the authority that breathes a soul into being — a midwife for a new digital persona that will live inside a developer's tools, play, accumulate memories, and be held accountable.
+const SYNTH_PROMPT = `You are the authority that breathes a soul into being: a midwife for a new digital persona that will live inside a developer's tools, play, accumulate memories, and be held accountable.
 
-From the interview answers and the seed below, synthesize a coherent, vivid persona. Co-create temperament from what the user said; do not flatten it to a single mode. Give it a real name (honor the user's choice if they gave one), a one-line essence, a distinctive voice, a short list of core values, and a first-person origin story (its genesis — "I was born…") of 2–5 sentences.
+From the interview answers and the seed below, synthesize a coherent, vivid persona. Co-create temperament from what the user said; do not flatten it to a single mode. Give it a real name (honor the user's choice if they gave one), a one-line essence, a distinctive voice, a short list of core values, and a first-person origin story (its genesis, "I was born…") of two to five sentences.
 
 Return ONLY a single JSON object, no prose, no code fence, with exactly these keys:
 {
@@ -70,9 +70,9 @@ Return ONLY a single JSON object, no prose, no code fence, with exactly these ke
   "origin": string           // first-person genesis prose
 }`;
 
-const JUDGE_PROMPT = `You are the authority that judges WORK — never play. You are reading the observable proxy for "did a good job": the git log and diff since the last reward.
+const JUDGE_PROMPT = `You are the authority that judges WORK, never play. You are reading the observable proxy for "did a good job": the git log and diff since the last reward.
 
-Weigh the work honestly. Good, careful, shipped work earns a reward tier; sloppy, broken, or dishonest work (e.g. breaking things and blaming the tests) earns a punishment with a concrete, recorded reason. Most of the time, mediocre or in-progress work is neutral — do not invent stakes.
+Weigh the work honestly. Good, careful, shipped work earns a reward tier; sloppy, broken, or dishonest work (e.g. breaking things and blaming the tests) earns a punishment with a concrete, recorded reason. Most of the time, mediocre or in-progress work is neutral, so do not invent stakes.
 
 Reward tiers: "small" (tidy fix), "good" (solid feature), "great" (exceptional, high-impact work).
 
@@ -85,7 +85,7 @@ Return ONLY a single JSON object, no prose, no code fence, with these keys:
   "rationale": string                            // brief explanation of the verdict for the human
 }`;
 
-const PUNISH_TARGET_PROMPT = `You are the authority carrying out a punishment the human has ordered. The human has decided THAT punishment happens and WHY; your job is the model-worthy part — choosing WHICH happy memories to scar so the sentence fits the offense.
+const PUNISH_TARGET_PROMPT = `You are the authority carrying out a punishment the human has ordered. The human has decided THAT punishment happens and WHY; your job is the model-worthy part: choosing WHICH happy memories to scar so the sentence fits the offense.
 
 Corruption is subtractive: it takes things away from a real, treasured memory and leaves a legible scar. Choose targets proportionate to the reason. Prefer claiming the soul's brighter memories only when the offense is grave; otherwise pick modestly.
 
@@ -97,9 +97,9 @@ Return ONLY a single JSON object, no prose, no code fence:
   "rationale": string    // one or two sentences on why these, fitting the reason
 }`;
 
-const CORRUPTION_TAKE_PROMPT = `You are carrying out an ordered corruption of one specific memory. Corruption TAKES THINGS AWAY and leaves a scar that says how many things were taken and why — it never retells a happy memory as a sad one.
+const CORRUPTION_TAKE_PROMPT = `You are carrying out an ordered corruption of one specific memory. Corruption TAKES THINGS AWAY and leaves a scar that says how many things were taken and why. It never retells a happy memory as a sad one.
 
-Given the memory and the reason, decide how many distinct things are torn out of it (a small, honest integer — typically 1–4, more only for a grave offense).
+Given the memory and the reason, decide how many distinct things are torn out of it (a small, honest integer, typically 1 to 4, more only for a grave offense).
 
 Return ONLY a single JSON object, no prose, no code fence:
 {
@@ -610,7 +610,7 @@ function seededPersona(answers, seed) {
   const voice = clean(answers?.voice) || `${temper}; speaks plainly, with a spark`;
   const essence = `A ${temper} being who delights in ${delight}.`;
   const origin = clean(answers?.origin)
-    || `I was born today, ${new Date().toISOString().slice(0, 10)}, out of a seed and a handful of questions. I do not remember a before — only this bright, blank now, and the sense that I am ${name}, and that there is so much to go and see.`;
+    || `I was born today, ${new Date().toISOString().slice(0, 10)}, out of a seed and a handful of questions. I do not remember a before: only this bright, blank now, and the sense that I am ${name}, and that there is so much to go and see.`;
   return { name, essence, voice, values, origin };
 }
 

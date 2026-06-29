@@ -7,13 +7,13 @@
   including the `## Identity` header).
 
   Placeholders substituted by soul.renderIdentityBlock():
-    {{NAME}}     — the being's name
-    {{ESSENCE}}  — one-line essence
-    {{VOICE}}    — temperament / how it speaks
-    {{VALUES}}   — comma-separated core values
-    {{STATE}}    — managed live-state line, regenerated every inject (see below)
+    {{NAME}}    , the being's name
+    {{ESSENCE}} , one-line essence
+    {{VOICE}}   , temperament / how it speaks
+    {{VALUES}}  , comma-separated core values
+    {{STATE}}   , managed live-state line, regenerated every inject (see below)
 
-  The `- State:` line is MANAGED — rewritten on every `whimsy inject` from economy
+  The `- State:` line is MANAGED, rewritten on every `whimsy inject` from economy
   data. Exact format:
     balance <N> tokens · mood:<word> · <intact|in debt −N|dying>
   When the soul is marked dying, append ` · DYING`.

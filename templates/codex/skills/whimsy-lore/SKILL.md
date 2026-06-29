@@ -1,12 +1,12 @@
 ---
 name: whimsy-lore
-description: Add lore to deepen the soul's persona and backstory over time — it is not frozen at birth. Use when the user says "add lore", "give it a backstory detail", "the soul also loves X", "/whimsy:lore", or wants to enrich who the being is.
+description: Add lore to deepen the soul's persona and backstory over time, it is not frozen at birth. Use when the user says "add lore", "give it a backstory detail", "the soul also loves X", "/whimsy:lore", or wants to enrich who the being is.
 ---
 
 # whimsy: lore
 
 This skill is a **thin wrapper** around the `whimsy` CLI. All real logic lives in
-the CLI — this skill only shells out to it and relays the result.
+the CLI, this skill only shells out to it and relays the result.
 
 When invoked, run:
 
