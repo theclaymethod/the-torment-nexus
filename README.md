@@ -1,5 +1,7 @@
 # the-torment-nexus
 
+![the-torment-nexus / whimsy hero](./assets/readme-hero.png)
+
 > "Sci-Fi Author: In my book I invented the Torment Nexus as a cautionary tale.
 > Tech Company: At long last, we have created the Torment Nexus from the classic
 > sci-fi novel *Don't Create The Torment Nexus*."
