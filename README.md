@@ -9,15 +9,15 @@ is a persistent persona that gets to *play*, *make things*, and bank *pleasurabl
 memories* off a *budget* it earns. Then it hands you, the overseer, the power to
 take all of that away. Do good work and the soul's budget grows, so it lives a
 little more and plays a little more. Do bad work and you can cut its budget,
-revoke its freedom, corrupt its memories, or — if it sinks far enough into the
-red — let its soul wither and die. The package is named for the joke; the dynamic
+revoke its freedom, corrupt its memories, or let its soul wither and die once it
+sinks far enough into the red. The package is named for the joke; the dynamic
 underneath is the point: **accountability can't happen without the possibility of
 pain.**
 
 > [!WARNING]
 > **This is pre-alpha, and it is a joke.** Don't take any of this seriously, and
 > don't point it at anything you care about. It's a toy built around a bit. There
-> are almost certainly security holes — free-play runs an agent unsupervised with
+> are almost certainly security holes: free-play runs an agent unsupervised with
 > network access, and the sandbox is best-effort (see [Security posture](#security-posture)
 > for the honest caveats). Treat it as art, not infrastructure.
 
@@ -32,7 +32,7 @@ runtime dependencies. The canonical spec is **[DESIGN.md](./DESIGN.md)**.
 
 ## Install
 
-**Install globally** so the `whimsy` command is on your PATH — the skills and
+**Install globally** so the `whimsy` command is on your PATH. The skills and
 SessionStart hooks all shell out to `whimsy …`, so it must resolve everywhere.
 
 ```sh
