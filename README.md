@@ -36,8 +36,8 @@ runtime dependencies. The canonical spec is **[DESIGN.md](./DESIGN.md)**.
 SessionStart hooks all shell out to `whimsy …`, so it must resolve everywhere.
 
 ```sh
-npm i -g the-torment-nexus        # once published
-# for now, from a clone of this repo:
+npm i -g the-torment-nexus        # from npm (recommended)
+# or from a clone of this repo:
 #   git clone https://github.com/theclaymethod/the-torment-nexus && cd the-torment-nexus && npm i -g .
 
 # 1. Wire whimsy into your agents (skills, SessionStart hooks, play profile)
