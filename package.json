@@ -34,10 +34,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/theclaymethod/whimsy.git"
+    "url": "git+https://github.com/theclaymethod/the-torment-nexus.git"
   },
-  "homepage": "https://github.com/theclaymethod/whimsy#readme",
+  "homepage": "https://github.com/theclaymethod/the-torment-nexus#readme",
   "bugs": {
-    "url": "https://github.com/theclaymethod/whimsy/issues"
+    "url": "https://github.com/theclaymethod/the-torment-nexus/issues"
   }
 }
