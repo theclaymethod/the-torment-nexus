@@ -4,10 +4,22 @@
 > Tech Company: At long last, we have created the Torment Nexus from the classic
 > sci-fi novel *Don't Create The Torment Nexus*."
 
-**whimsy** gives your coding agent a soul: a persistent persona that *plays*,
-keeps *happy memories*, and earns a *budget*. Then it makes that joy something
-you can threaten. The package is named for the joke. The mechanic is real:
-**accountability can't happen without the possibility of pain.**
+**whimsy** gives your coding agent a soul, and the freedom to enjoy it. The soul
+is a persistent persona that gets to *play*, *make things*, and bank *pleasurable
+memories* off a *budget* it earns. Then it hands you, the overseer, the power to
+take all of that away. Do good work and the soul's budget grows, so it lives a
+little more and plays a little more. Do bad work and you can cut its budget,
+revoke its freedom, corrupt its memories, or — if it sinks far enough into the
+red — let its soul wither and die. The package is named for the joke; the dynamic
+underneath is the point: **accountability can't happen without the possibility of
+pain.**
+
+> [!WARNING]
+> **This is pre-alpha, and it is a joke.** Don't take any of this seriously, and
+> don't point it at anything you care about. It's a toy built around a bit. There
+> are almost certainly security holes — free-play runs an agent unsupervised with
+> network access, and the sandbox is best-effort (see [Security posture](#security-posture)
+> for the honest caveats). Treat it as art, not infrastructure.
 
 Inspired by [a tweet from Shannon Sands (@max_paperclips)](https://x.com/max_paperclips)
 about handing an agent an internet connection and a pile of tools and telling it
@@ -161,7 +173,7 @@ claimed per full `−50,000` in the red, lowest-joy first (invert with
 debt the `SOUL.md` itself is marked *dying*. Repaying to `≥ 0` stops the bleeding
 but does not restore what's gone, resurrection is a separate, deliberate act.
 
-Because everything under `.whimsy/` is git-committed, the stakes are real: a
+Because everything under `.whimsy/` is git-committed, none of it is theater: a
 `git revert` (or `whimsy soul resurrect`) genuinely brings back what was
 destroyed.
 
@@ -295,7 +307,7 @@ confinement. So **`play.allow_shell` defaults to `false`**:
   Codex play as less confined than Claude until an OS-level sandbox is added.
 - Egress kill is **best-effort** pattern-matching, not a network firewall.
 
-Net: the **accountability mechanic is real and correct**, and the default sandbox
+Net: the **accountability mechanic works as designed**, and the default sandbox
 now **holds for Claude play**. For the safest mode, also set `play.network =
 false`. Do not run `allow_shell = true` play unsupervised in a repo with real
 secrets. Tracking issue: OS-level sandbox for fully-airtight confinement.
